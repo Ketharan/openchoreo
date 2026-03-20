@@ -38,7 +38,7 @@ kubectl apply --server-side \
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
   --namespace cert-manager \
   --create-namespace \
-  --version v1.19.2 \
+  --version v1.19.4 \
   --set crds.enabled=true
 ```
 
@@ -53,7 +53,7 @@ kubectl wait --for=condition=Available deployment/cert-manager \
 helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/external-secrets \
   --namespace external-secrets \
   --create-namespace \
-  --version 1.3.2 \
+  --version 2.0.1 \
   --set installCRDs=true
 ```
 

@@ -89,7 +89,7 @@ Use the purge script to invalidate stale images:
 ./purge-cache.sh openchoreo/*
 
 # Purge from any registry (auto-detected)
-./purge-cache.sh external-secrets/external-secrets:v1.3.2
+./purge-cache.sh external-secrets/external-secrets:v2.0.1
 
 # Purge everything from all caches
 ./purge-cache.sh --all

@@ -2,7 +2,7 @@
 # Purge cached images from the registry caches.
 #
 # Usage:
-#   ./purge-cache.sh external-secrets/external-secrets:v1.3.2   # Purge a specific image:tag
+#   ./purge-cache.sh external-secrets/external-secrets:v2.0.1   # Purge a specific image:tag
 #   ./purge-cache.sh openchoreo/controller                      # Purge all tags of a repo
 #   ./purge-cache.sh openchoreo/*                               # Purge all openchoreo repos
 #   ./purge-cache.sh --all                                      # Purge everything from all caches
@@ -43,8 +43,8 @@ The image is automatically found and purged from whichever cache contains it.
 Examples:
   $0 openchoreo/controller:latest-dev
   $0 openchoreo/*
-  $0 external-secrets/external-secrets:v1.3.2
-  $0 jetstack/cert-manager-controller:v1.19.2
+  $0 external-secrets/external-secrets:v2.0.1
+  $0 jetstack/cert-manager-controller:v1.19.4
   $0 --all
 EOF
 }

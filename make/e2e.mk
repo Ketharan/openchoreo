@@ -27,8 +27,8 @@ E2E_OP_NS              := openchoreo-observability-plane
 
 # Dependency versions (keep in sync with install/k3d/single-cluster/README.md)
 GATEWAY_API_VERSION    ?= v1.4.1
-CERT_MANAGER_VERSION   ?= v1.19.2
-ESO_VERSION            ?= 1.3.2
+CERT_MANAGER_VERSION   ?= v1.19.4
+ESO_VERSION            ?= 2.0.1
 KGATEWAY_VERSION       ?= v2.1.1
 THUNDER_VERSION        ?= 0.28.0
 

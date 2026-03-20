@@ -18,11 +18,11 @@ THUNDER_NS="thunder"
 HELM_REPO="oci://ghcr.io/openchoreo/helm-charts"
 
 # Cert-manager configuration
-CERT_MANAGER_VERSION="v1.19.2"
+CERT_MANAGER_VERSION="v1.19.4"
 CERT_MANAGER_REPO="oci://quay.io/jetstack/charts"
 
 # External Secrets Operator configuration
-ESO_VERSION="v1.3.2"
+ESO_VERSION="v2.0.1"
 ESO_REPO="oci://ghcr.io/external-secrets/charts"
 
 # kgateway configuration

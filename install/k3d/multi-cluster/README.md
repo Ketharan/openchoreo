@@ -49,7 +49,7 @@ helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
   --kube-context k3d-openchoreo-cp \
   --namespace cert-manager \
   --create-namespace \
-  --version v1.19.2 \
+  --version v1.19.4 \
   --set crds.enabled=true
 
 kubectl --context k3d-openchoreo-cp wait --for=condition=Available deployment/cert-manager \
@@ -139,7 +139,7 @@ helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
   --kube-context k3d-openchoreo-dp \
   --namespace cert-manager \
   --create-namespace \
-  --version v1.19.2 \
+  --version v1.19.4 \
   --set crds.enabled=true
 
 kubectl --context k3d-openchoreo-dp wait --for=condition=Available deployment/cert-manager \
@@ -150,7 +150,7 @@ helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/ex
   --kube-context k3d-openchoreo-dp \
   --namespace external-secrets \
   --create-namespace \
-  --version 1.3.2 \
+  --version 2.0.1 \
   --set installCRDs=true
 
 kubectl --context k3d-openchoreo-dp wait --for=condition=Available deployment/external-secrets \
@@ -262,7 +262,7 @@ helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
   --kube-context k3d-openchoreo-wp \
   --namespace cert-manager \
   --create-namespace \
-  --version v1.19.2 \
+  --version v1.19.4 \
   --set crds.enabled=true
 
 kubectl --context k3d-openchoreo-wp wait --for=condition=Available deployment/cert-manager \
@@ -273,7 +273,7 @@ helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/ex
   --kube-context k3d-openchoreo-wp \
   --namespace external-secrets \
   --create-namespace \
-  --version 1.3.2 \
+  --version 2.0.1 \
   --set installCRDs=true
 
 kubectl --context k3d-openchoreo-wp wait --for=condition=Available deployment/external-secrets \
@@ -396,7 +396,7 @@ helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
   --kube-context k3d-openchoreo-op \
   --namespace cert-manager \
   --create-namespace \
-  --version v1.19.2 \
+  --version v1.19.4 \
   --set crds.enabled=true
 
 kubectl --context k3d-openchoreo-op wait --for=condition=Available deployment/cert-manager \
@@ -407,7 +407,7 @@ helm upgrade --install external-secrets oci://ghcr.io/external-secrets/charts/ex
   --kube-context k3d-openchoreo-op \
   --namespace external-secrets \
   --create-namespace \
-  --version 1.3.2 \
+  --version 2.0.1 \
   --set installCRDs=true
 
 kubectl --context k3d-openchoreo-op wait --for=condition=Available deployment/external-secrets \
