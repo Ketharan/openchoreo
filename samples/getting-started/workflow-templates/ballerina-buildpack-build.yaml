@@ -10,7 +10,7 @@ spec:
           - name: git-revision
           - name: build-env
       container:
-        image: ghcr.io/openchoreo/podman-runner:v1.0
+        image: ghcr.io/openchoreo/podman-runner:v1.1
         command:
           - sh
           - -c
