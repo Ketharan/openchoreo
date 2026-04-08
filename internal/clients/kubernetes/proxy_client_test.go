@@ -9,6 +9,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/pem"
 	"io"
 	"math/big"
 	"net/http"
@@ -301,52 +302,7 @@ func mustCreateSelfSignedCertPEM(t *testing.T) []byte {
 	der, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, &key.PublicKey, key)
 	require.NoError(t, err)
 
-	return []byte("-----BEGIN CERTIFICATE-----\n" +
-		encodeBase64WithLineBreaks(der) +
-		"\n-----END CERTIFICATE-----\n")
-}
-
-func encodeBase64WithLineBreaks(data []byte) string {
-	const lineLen = 64
-	enc := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-
-	var out strings.Builder
-	for i := 0; i < len(data); i += 3 {
-		var b [3]byte
-		n := copy(b[:], data[i:])
-
-		v := uint(b[0])<<16 | uint(b[1])<<8 | uint(b[2])
-		out.WriteByte(enc[(v>>18)&0x3f])
-		out.WriteByte(enc[(v>>12)&0x3f])
-		if n > 1 {
-			out.WriteByte(enc[(v>>6)&0x3f])
-		} else {
-			out.WriteByte('=')
-		}
-		if n > 2 {
-			out.WriteByte(enc[v&0x3f])
-		} else {
-			out.WriteByte('=')
-		}
-	}
-
-	raw := out.String()
-	if len(raw) <= lineLen {
-		return raw
-	}
-
-	var wrapped strings.Builder
-	for i := 0; i < len(raw); i += lineLen {
-		end := i + lineLen
-		if end > len(raw) {
-			end = len(raw)
-		}
-		if i > 0 {
-			wrapped.WriteByte('\n')
-		}
-		wrapped.WriteString(raw[i:end])
-	}
-	return wrapped.String()
+	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})
 }
 
 func TestGetGVKForList(t *testing.T) {
