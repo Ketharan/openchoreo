@@ -28,6 +28,7 @@ func NewComponentCmd(f client.NewClientFunc) *cobra.Command {
 		newScaffoldCmd(f),
 		newDeployCmd(f),
 		newLogsCmd(f),
+		newExecCmd(f),
 		newWorkflowCmd(f),
 		newWorkflowRunCmd(f),
 	)
@@ -249,6 +250,69 @@ If --env is not specified, uses the lowest environment from the deployment pipel
 	flags.AddFollow(cmd)
 	flags.AddSince(cmd)
 	flags.AddTail(cmd)
+	return cmd
+}
+
+func newExecCmd(f client.NewClientFunc) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "exec COMPONENT_NAME [-- COMMAND [args...]]",
+		Short: "Execute a command in a component's running pod",
+		Long: `Open an interactive exec session to a component's running pod.
+
+If no command is specified after --, defaults to /bin/sh.
+If --env is not specified, uses the lowest environment from the deployment pipeline.`,
+		Example: `  # Interactive shell in a component's pod
+  occ component exec my-service
+
+  # Run a specific command
+  occ component exec my-service -- ls /app
+
+  # Specify environment and container
+  occ component exec my-service --env dev --container app -- curl localhost:8080/health`,
+		Args:    cobra.MinimumNArgs(1),
+		PreRunE: auth.RequireLogin(),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cl, err := f()
+			if err != nil {
+				return err
+			}
+
+			// Separate component name from command (args after --)
+			componentName := args[0]
+			var command []string
+			if dash := cmd.ArgsLenAtDash(); dash > 0 {
+				command = args[dash:]
+			}
+
+			tty, _ := cmd.Flags().GetBool("tty")
+			stdin, _ := cmd.Flags().GetBool("stdin")
+
+			// Default: interactive mode (both stdin and tty)
+			if !cmd.Flags().Changed("tty") && !cmd.Flags().Changed("stdin") {
+				tty = true
+				stdin = true
+			}
+
+			container, _ := cmd.Flags().GetString("container")
+
+			return New(cl).Exec(ExecParams{
+				Namespace:   flags.GetNamespace(cmd),
+				Project:     flags.GetProject(cmd),
+				Component:   componentName,
+				Environment: flags.GetEnvironment(cmd),
+				Container:   container,
+				Command:     command,
+				TTY:         tty,
+				Stdin:       stdin,
+			})
+		},
+	}
+	flags.AddNamespace(cmd)
+	flags.AddProject(cmd)
+	flags.AddEnvironment(cmd)
+	cmd.Flags().StringP("container", "c", "", "Container name to exec into (defaults to first container)")
+	cmd.Flags().BoolP("tty", "t", false, "Allocate a pseudo-TTY")
+	cmd.Flags().BoolP("stdin", "i", false, "Pass stdin to the container")
 	return cmd
 }
 

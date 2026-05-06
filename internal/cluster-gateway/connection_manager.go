@@ -426,6 +426,17 @@ func (ac *AgentConnection) SendHTTPTunnelRequest(req *messaging.HTTPTunnelReques
 	return nil
 }
 
+// SendRawMessage sends a pre-marshaled JSON message through this connection.
+func (ac *AgentConnection) SendRawMessage(data []byte) error {
+	ac.mu.Lock()
+	defer ac.mu.Unlock()
+
+	if err := ac.Conn.WriteMessage(websocket.TextMessage, data); err != nil {
+		return fmt.Errorf("SendRawMessage: failed to send message: %w", err)
+	}
+	return nil
+}
+
 // Close closes the agent connection
 func (ac *AgentConnection) Close() error {
 	ac.mu.Lock()

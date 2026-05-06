@@ -200,6 +200,14 @@ func main() {
 	// routes, so they share the same mux without an extra wrapping layer.
 	baseMux := http.NewServeMux()
 
+	// Exec WebSocket endpoint (registered before OpenAPI routes)
+	if cfg.ClusterGateway.Enabled && gatewayURL != "" {
+		execHandler := openapihandlers.NewExecHandler(k8sClient, gwClient, gatewayURL, logger)
+		execLoggerMw := apilogger.LoggerMiddleware(logger.With("component", "exec"))
+		baseMux.Handle("/exec/", middleware.Chain(execLoggerMw, jwtMiddleware)(execHandler))
+		logger.Info("Exec endpoint registered", "path", "/exec/namespaces/{ns}/components/{name}")
+	}
+
 	// MCP endpoint (only if enabled)
 	if cfg.MCP.Enabled {
 		mcpLogger := logger.With("component", "mcp")

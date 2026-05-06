@@ -46,16 +46,18 @@ type Connection interface {
 }
 
 type Server struct {
-	config              *Config
-	httpServer          *http.Server
-	healthServer        *http.Server
-	upgrader            websocket.Upgrader
-	connMgr             *ConnectionManager
-	pendingHTTPRequests map[string]chan *messaging.HTTPTunnelResponse
-	requestsMu          sync.Mutex
-	validator           *RequestValidator
-	logger              *slog.Logger
-	k8sClient           client.Client // Kubernetes client for querying DataPlane/WorkflowPlane CRs
+	config                *Config
+	httpServer            *http.Server
+	healthServer          *http.Server
+	upgrader              websocket.Upgrader
+	connMgr               *ConnectionManager
+	pendingHTTPRequests   map[string]chan *messaging.HTTPTunnelResponse
+	requestsMu            sync.Mutex
+	pendingStreamSessions map[string]*streamSession
+	streamSessionsMu      sync.RWMutex
+	validator             *RequestValidator
+	logger                *slog.Logger
+	k8sClient             client.Client // Kubernetes client for querying DataPlane/WorkflowPlane CRs
 }
 
 func New(config *Config, k8sClient client.Client, logger *slog.Logger) *Server {
@@ -66,11 +68,12 @@ func New(config *Config, k8sClient client.Client, logger *slog.Logger) *Server {
 				return true
 			},
 		},
-		connMgr:             NewConnectionManager(logger),
-		pendingHTTPRequests: make(map[string]chan *messaging.HTTPTunnelResponse),
-		validator:           NewRequestValidator(),
-		logger:              logger.With("component", "agent-server"),
-		k8sClient:           k8sClient,
+		connMgr:               NewConnectionManager(logger),
+		pendingHTTPRequests:   make(map[string]chan *messaging.HTTPTunnelResponse),
+		pendingStreamSessions: make(map[string]*streamSession),
+		validator:             NewRequestValidator(),
+		logger:                logger.With("component", "agent-server"),
+		k8sClient:             k8sClient,
 	}
 }
 
@@ -114,6 +117,7 @@ func (s *Server) Start() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", s.handleWebSocket)
 	mux.HandleFunc("/api/proxy/", s.handleHTTPProxy) // HTTP proxy to data plane services
+	mux.HandleFunc("/api/exec/", s.handleExec)       // WebSocket exec proxy to data plane pods
 
 	// Register plane lifecycle API (for controller notifications and status queries)
 	planeAPI := NewPlaneAPI(s.connMgr, s, s.logger)
@@ -331,6 +335,13 @@ func (s *Server) handleConnection(planeName, connID string, conn Connection) {
 		}
 
 		s.connMgr.UpdateConnectionLastSeen(planeName, connID)
+
+		// Try to route as a stream chunk (has "data" field and no "statusCode" at top level)
+		var streamChunk messaging.HTTPTunnelStreamChunk
+		if err := json.Unmarshal(data, &streamChunk); err == nil && streamChunk.RequestID != "" && (streamChunk.Data != nil || streamChunk.IsClose) {
+			s.handleStreamChunk(&streamChunk)
+			continue
+		}
 
 		var httpResp messaging.HTTPTunnelResponse
 		if err := json.Unmarshal(data, &httpResp); err != nil {

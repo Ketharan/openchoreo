@@ -38,10 +38,14 @@ type Agent struct {
 	serverCA   *x509.CertPool
 	conn       Connection
 	k8sClient  client.Client
+	k8sConfig  *rest.Config
 	router     *Router
 	mu         sync.Mutex
 	logger     *slog.Logger
 	stopChan   chan struct{}
+	// activeStreams tracks active exec streaming sessions indexed by requestID
+	activeStreams   map[string]*execSession
+	activeStreamsMu sync.Mutex
 }
 
 func New(cfg *Config, k8sClient client.Client, k8sConfig *rest.Config, logger *slog.Logger) (*Agent, error) {
@@ -86,13 +90,15 @@ func New(cfg *Config, k8sClient client.Client, k8sConfig *rest.Config, logger *s
 	}
 
 	return &Agent{
-		config:     cfg,
-		clientCert: cert,
-		serverCA:   serverCertPool,
-		k8sClient:  k8sClient,
-		router:     router,
-		logger:     logger.With("component", "agent", "planeID", cfg.PlaneID),
-		stopChan:   make(chan struct{}),
+		config:        cfg,
+		clientCert:    cert,
+		serverCA:      serverCertPool,
+		k8sClient:     k8sClient,
+		k8sConfig:     k8sConfig,
+		router:        router,
+		logger:        logger.With("component", "agent", "planeID", cfg.PlaneID),
+		stopChan:      make(chan struct{}),
+		activeStreams: make(map[string]*execSession),
 	}, nil
 }
 
@@ -231,7 +237,21 @@ func (a *Agent) handleConnection(ctx context.Context) {
 			return
 		}
 
-		// Parse as HTTPTunnelRequest
+		// Try to parse as stream init (exec requests)
+		var streamInit messaging.HTTPTunnelStreamInit
+		if err := json.Unmarshal(message, &streamInit); err == nil && streamInit.IsUpgrade && streamInit.RequestID != "" {
+			go a.handleHTTPTunnelStreamInit(&streamInit)
+			continue
+		}
+
+		// Try to parse as stream chunk (stdin data for active exec sessions)
+		var streamChunk messaging.HTTPTunnelStreamChunk
+		if err := json.Unmarshal(message, &streamChunk); err == nil && streamChunk.RequestID != "" && streamChunk.Data != nil {
+			a.routeStreamChunk(&streamChunk)
+			continue
+		}
+
+		// Parse as regular HTTPTunnelRequest
 		var httpReq messaging.HTTPTunnelRequest
 		if err := json.Unmarshal(message, &httpReq); err != nil {
 			a.logger.Warn("failed to parse HTTP tunnel request", "error", err)
