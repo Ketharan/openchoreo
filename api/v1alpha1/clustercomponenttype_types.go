@@ -8,7 +8,7 @@ import (
 )
 
 // ClusterComponentTypeSpec defines the desired state of ClusterComponentType.
-// +kubebuilder:validation:XValidation:rule="self.workloadType == 'proxy' || self.resources.exists(r, r.id == self.workloadType)",message="resources must contain a primary resource with id matching workloadType (unless workloadType is 'proxy')"
+// +kubebuilder:validation:XValidation:rule="self.workloadType == 'proxy' || has(self.moduleRef) || self.resources.exists(r, r.id == self.workloadType)",message="resources must contain a primary resource with id matching workloadType (unless workloadType is 'proxy' or moduleRef is set)"
 type ClusterComponentTypeSpec struct {
 	// WorkloadType must be one of: deployment, statefulset, cronjob, job, proxy
 	// This determines the primary workload resource type for this component type
@@ -51,12 +51,14 @@ type ClusterComponentTypeSpec struct {
 	// +optional
 	Validations []ValidationRule `json:"validations,omitempty"`
 
+	// ModuleRef delegates reconciliation to a community module controller.
+	// +optional
+	ModuleRef *ModuleRef `json:"moduleRef,omitempty"`
+
 	// Resources are templates that generate Kubernetes resources dynamically.
-	// At least one resource template is required. For non-proxy workload types,
-	// one resource must have an id matching the workloadType. When workloadType
-	// is "proxy", a matching resource id is not required.
-	// +kubebuilder:validation:MinItems=1
-	Resources []ResourceTemplate `json:"resources"`
+	// At least one resource template is required unless moduleRef is set.
+	// +optional
+	Resources []ResourceTemplate `json:"resources,omitempty"`
 }
 
 // ClusterComponentTypeStatus defines the observed state of ClusterComponentType.

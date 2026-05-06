@@ -53,8 +53,19 @@ func (s *SchemaSection) IsOpenAPIV3() bool {
 	return s != nil && s.OpenAPIV3Schema != nil
 }
 
+// ModuleRef references a community module that handles reconciliation for this component type.
+// When set, the core controller delegates reconciliation to the module controller
+// instead of processing the component through the standard rendering pipeline.
+type ModuleRef struct {
+	// SentinelCRD is the fully-qualified CRD name (e.g., "sandboxpolicies.agent.openchoreo.dev")
+	// that the core controller probes via the REST mapper to determine if the module is installed.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	SentinelCRD string `json:"sentinelCRD"`
+}
+
 // ComponentTypeSpec defines the desired state of ComponentType.
-// +kubebuilder:validation:XValidation:rule="self.workloadType == 'proxy' || self.resources.exists(r, r.id == self.workloadType)",message="resources must contain a primary resource with id matching workloadType (unless workloadType is 'proxy')"
+// +kubebuilder:validation:XValidation:rule="self.workloadType == 'proxy' || has(self.moduleRef) || self.resources.exists(r, r.id == self.workloadType)",message="resources must contain a primary resource with id matching workloadType (unless workloadType is 'proxy' or moduleRef is set)"
 type ComponentTypeSpec struct {
 	// WorkloadType must be one of: deployment, statefulset, cronjob, job, proxy
 	// This determines the primary workload resource type for this component type
@@ -97,12 +108,16 @@ type ComponentTypeSpec struct {
 	// +optional
 	Validations []ValidationRule `json:"validations,omitempty"`
 
+	// ModuleRef delegates reconciliation to a community module controller.
+	// When set, the core controller checks for the sentinel CRD and, if present,
+	// skips the standard rendering pipeline and lets the module handle the component.
+	// +optional
+	ModuleRef *ModuleRef `json:"moduleRef,omitempty"`
+
 	// Resources are templates that generate Kubernetes resources dynamically.
-	// At least one resource template is required. For non-proxy workload types,
-	// one resource must have an id matching the workloadType. When workloadType
-	// is "proxy", a matching resource id is not required.
-	// +kubebuilder:validation:MinItems=1
-	Resources []ResourceTemplate `json:"resources"`
+	// At least one resource template is required unless moduleRef is set.
+	// +optional
+	Resources []ResourceTemplate `json:"resources,omitempty"`
 }
 
 // ResourceTemplate defines a template for generating Kubernetes resources

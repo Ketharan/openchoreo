@@ -53,6 +53,14 @@ const (
 	// ReasonWorkflowNotFound indicates the referenced Workflow doesn't exist
 	ReasonWorkflowNotFound controller.ConditionReason = "WorkflowNotFound"
 
+	// Module delegation
+
+	// ReasonDelegatedToModule indicates the component type has a moduleRef and
+	// the module is installed — the core controller will not reconcile further.
+	ReasonDelegatedToModule controller.ConditionReason = "DelegatedToModule"
+	// ReasonModuleNotInstalled indicates the moduleRef sentinel CRD was not found.
+	ReasonModuleNotInstalled controller.ConditionReason = "ModuleNotInstalled"
+
 	// AutoDeploy issues (Status=False)
 
 	// ReasonAutoDeployFailed indicates failure to handle autoDeploy (ComponentRelease/ReleaseBinding creation)

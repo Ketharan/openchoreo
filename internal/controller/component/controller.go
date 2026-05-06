@@ -11,8 +11,10 @@ import (
 
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	kerrors "k8s.io/apimachinery/pkg/util/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -116,6 +118,12 @@ func (r *Reconciler) reconcileWithComponentType(ctx context.Context, comp *openc
 	if ct == nil {
 		// Validation error, condition already set
 		return ctrl.Result{}, nil
+	}
+
+	// If the ComponentType delegates to a community module, check if the module
+	// is installed (via sentinel CRD) and skip the standard rendering pipeline.
+	if ct.Spec.ModuleRef != nil {
+		return r.handleModuleDelegation(ctx, comp, ct.Spec.ModuleRef)
 	}
 
 	// Validate Workflow (if specified)
@@ -284,6 +292,7 @@ func (r *Reconciler) validateAndFetchComponentType(ctx context.Context, comp *op
 				Traits:             traits,
 				AllowedTraits:      allowedTraits,
 				Validations:        cct.Spec.Validations,
+				ModuleRef:          cct.Spec.ModuleRef,
 				Resources:          cct.Spec.Resources,
 			},
 		}
@@ -909,4 +918,57 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 			handler.EnqueueRequestsFromMapFunc(r.listComponentsForDeploymentPipeline)).
 		Named("component").
 		Complete(r)
+}
+
+// ─── Module Delegation ───────────────────────────────────────────────────────
+
+// handleModuleDelegation checks whether the community module referenced by the
+// ComponentType is installed (by probing for its sentinel CRD) and sets the
+// appropriate status condition. When installed, the core controller does nothing
+// further — the module's own controller handles reconciliation.
+func (r *Reconciler) handleModuleDelegation(
+	ctx context.Context,
+	comp *openchoreov1alpha1.Component,
+	ref *openchoreov1alpha1.ModuleRef,
+) (ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+
+	installed, err := r.isModuleInstalled(ref.SentinelCRD)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to check module installation: %w", err)
+	}
+
+	if !installed {
+		msg := fmt.Sprintf("Community module not installed (sentinel CRD %q not found)", ref.SentinelCRD)
+		controller.MarkFalseCondition(comp, ConditionReady, ReasonModuleNotInstalled, msg)
+		logger.Info(msg, "component", comp.Name)
+		return ctrl.Result{}, nil
+	}
+
+	msg := fmt.Sprintf("Delegated to community module (sentinel CRD %q detected)", ref.SentinelCRD)
+	controller.MarkTrueCondition(comp, ConditionReady, ReasonDelegatedToModule, msg)
+	logger.V(1).Info(msg, "component", comp.Name)
+	return ctrl.Result{}, nil
+}
+
+// isModuleInstalled probes the REST mapper for the sentinel CRD to determine
+// whether the community module is installed on the cluster.
+// The sentinelCRD is a fully-qualified CRD name like "sandboxpolicies.agent.openchoreo.dev".
+func (r *Reconciler) isModuleInstalled(sentinelCRD string) (bool, error) {
+	parts := strings.SplitN(sentinelCRD, ".", 2)
+	if len(parts) != 2 {
+		return false, fmt.Errorf("invalid sentinelCRD format %q: expected <resource>.<group>", sentinelCRD)
+	}
+
+	_, err := r.Client.RESTMapper().ResourcesFor(schema.GroupVersionResource{
+		Group:    parts[1],
+		Resource: parts[0],
+	})
+	if err != nil {
+		if meta.IsNoMatchError(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
