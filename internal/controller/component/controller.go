@@ -926,6 +926,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 // ComponentType is installed (by probing for its sentinel CRD) and sets the
 // appropriate status condition. When installed, the core controller does nothing
 // further — the module's own controller handles reconciliation.
+//nolint:unparam // result is always zero but signature matches the reconcile return convention
 func (r *Reconciler) handleModuleDelegation(
 	ctx context.Context,
 	comp *openchoreov1alpha1.Component,
