@@ -116,7 +116,9 @@ spec:
                     description: |-
                       SentinelCRD is the fully-qualified CRD name (e.g., "sandboxpolicies.agent.openchoreo.dev")
                       that the core controller probes via the REST mapper to determine if the module is installed.
+                      Format: <plural-resource>.<api-group>
                     minLength: 1
+                    pattern: ^[a-z][a-z0-9]*\.[a-z][a-z0-9.]*[a-z0-9]$
                     type: string
                 required:
                 - sentinelCRD

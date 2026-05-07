@@ -59,8 +59,10 @@ func (s *SchemaSection) IsOpenAPIV3() bool {
 type ModuleRef struct {
 	// SentinelCRD is the fully-qualified CRD name (e.g., "sandboxpolicies.agent.openchoreo.dev")
 	// that the core controller probes via the REST mapper to determine if the module is installed.
+	// Format: <plural-resource>.<api-group>
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern=`^[a-z][a-z0-9]*\.[a-z][a-z0-9.]*[a-z0-9]$`
 	SentinelCRD string `json:"sentinelCRD"`
 }
 

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -927,7 +928,6 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 // appropriate status condition. When installed, the core controller does nothing
 // further — the module's own controller handles reconciliation.
 //
-//nolint:unparam // result is always zero but signature matches the reconcile return convention
 func (r *Reconciler) handleModuleDelegation(
 	ctx context.Context,
 	comp *openchoreov1alpha1.Component,
@@ -944,13 +944,15 @@ func (r *Reconciler) handleModuleDelegation(
 		msg := fmt.Sprintf("Community module not installed (sentinel CRD %q not found)", ref.SentinelCRD)
 		controller.MarkFalseCondition(comp, ConditionReady, ReasonModuleNotInstalled, msg)
 		logger.Info(msg, "component", comp.Name)
-		return ctrl.Result{}, nil
+		// Requeue so we detect module installation without depending on a CRD watch.
+		return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 	}
 
 	msg := fmt.Sprintf("Delegated to community module (sentinel CRD %q detected)", ref.SentinelCRD)
 	controller.MarkTrueCondition(comp, ConditionReady, ReasonDelegatedToModule, msg)
 	logger.V(1).Info(msg, "component", comp.Name)
-	return ctrl.Result{}, nil
+	// Requeue periodically to detect module uninstallation.
+	return ctrl.Result{RequeueAfter: 5 * time.Minute}, nil
 }
 
 // isModuleInstalled probes the REST mapper for the sentinel CRD to determine
