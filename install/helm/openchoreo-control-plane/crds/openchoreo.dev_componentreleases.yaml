@@ -1,3 +1,4 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -184,6 +185,21 @@ spec:
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                         type: object
+                      moduleRef:
+                        description: |-
+                          ModuleRef delegates reconciliation to a community module controller.
+                          When set, the core controller checks for the sentinel CRD and, if present,
+                          skips the standard rendering pipeline and lets the module handle the component.
+                        properties:
+                          sentinelCRD:
+                            description: |-
+                              SentinelCRD is the fully-qualified CRD name (e.g., "sandboxpolicies.agent.openchoreo.dev")
+                              that the core controller probes via the REST mapper to determine if the module is installed.
+                            minLength: 1
+                            type: string
+                        required:
+                        - sentinelCRD
+                        type: object
                       parameters:
                         description: Parameters defines what developers can configure
                           when creating components of this type.
@@ -197,9 +213,7 @@ spec:
                       resources:
                         description: |-
                           Resources are templates that generate Kubernetes resources dynamically.
-                          At least one resource template is required. For non-proxy workload types,
-                          one resource must have an id matching the workloadType. When workloadType
-                          is "proxy", a matching resource id is not required.
+                          At least one resource template is required unless moduleRef is set.
                         items:
                           description: ResourceTemplate defines a template for generating
                             Kubernetes resources
@@ -251,7 +265,6 @@ spec:
                           x-kubernetes-validations:
                           - message: var is required when forEach is specified
                             rule: '!has(self.forEach) || has(self.var)'
-                        minItems: 1
                         type: array
                       traits:
                         description: |-
@@ -342,14 +355,14 @@ spec:
                         - message: spec.workloadType cannot be changed after creation
                           rule: self == oldSelf
                     required:
-                    - resources
                     - workloadType
                     type: object
                     x-kubernetes-validations:
                     - message: resources must contain a primary resource with id matching
-                        workloadType (unless workloadType is 'proxy')
-                      rule: self.workloadType == 'proxy' || self.resources.exists(r,
-                        r.id == self.workloadType)
+                        workloadType (unless workloadType is 'proxy' or moduleRef
+                        is set)
+                      rule: self.workloadType == 'proxy' || has(self.moduleRef) ||
+                        self.resources.exists(r, r.id == self.workloadType)
                 required:
                 - kind
                 - name
