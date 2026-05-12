@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/gorilla/websocket"
@@ -34,6 +35,19 @@ type terminalSize struct {
 	Height uint16 `json:"height"`
 }
 
+// wsWriter serializes all writes to a WebSocket connection.
+// gorilla/websocket panics on concurrent writes.
+type wsWriter struct {
+	conn *websocket.Conn
+	mu   sync.Mutex
+}
+
+func (w *wsWriter) write(messageType int, data []byte) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.conn.WriteMessage(messageType, data)
+}
+
 // Exec opens an interactive exec session to a component's running pod.
 func (cp *Component) Exec(params ExecParams) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -50,6 +64,8 @@ func (cp *Component) Exec(params ExecParams) error {
 	}
 	defer conn.Close()
 
+	ws := &wsWriter{conn: conn}
+
 	// Put terminal in raw mode for interactive TTY sessions
 	fd := int(os.Stdin.Fd())
 	if term.IsTerminal(fd) && params.TTY {
@@ -60,12 +76,12 @@ func (cp *Component) Exec(params ExecParams) error {
 		defer func() { _ = term.Restore(fd, oldState) }()
 
 		if w, h, sizeErr := term.GetSize(fd); sizeErr == nil {
-			sendResize(conn, safeUint16(w), safeUint16(h))
+			sendResize(ws, safeUint16(w), safeUint16(h))
 		}
-		go watchResize(ctx, conn, fd)
+		go watchResize(ctx, ws, fd)
 	}
 
-	return streamExecIO(ctx, conn, params.Stdin)
+	return streamExecIO(ctx, ws, conn, params.Stdin)
 }
 
 // dialExecWebSocket establishes a WebSocket connection to the exec endpoint.
@@ -109,18 +125,20 @@ func dialExecWebSocket(ctx context.Context, params ExecParams) (*websocket.Conn,
 }
 
 // streamExecIO pumps stdin/stdout/stderr between the local terminal and
-// the remote WebSocket exec session.
-func streamExecIO(ctx context.Context, conn *websocket.Conn, attachStdin bool) error {
-	errCh := make(chan error, 2)
+// the remote WebSocket exec session. It waits for the remote side to close
+// the connection (stdout pump exits), not for local stdin EOF.
+func streamExecIO(ctx context.Context, ws *wsWriter, conn *websocket.Conn, attachStdin bool) error {
+	// Channel for the stdout pump — the authoritative signal that exec is done.
+	stdoutDone := make(chan error, 1)
 
 	if attachStdin {
-		go pumpStdin(conn, errCh)
+		go pumpStdin(ws)
 	}
 
-	go pumpStdout(conn, errCh)
+	go pumpStdout(conn, stdoutDone)
 
 	select {
-	case err := <-errCh:
+	case err := <-stdoutDone:
 		if err == nil {
 			return nil
 		}
@@ -136,7 +154,10 @@ func streamExecIO(ctx context.Context, conn *websocket.Conn, attachStdin bool) e
 	}
 }
 
-func pumpStdin(conn *websocket.Conn, errCh chan<- error) {
+// pumpStdin reads from os.Stdin and sends to the WebSocket.
+// When stdin hits EOF it sends the EOF marker but does NOT signal completion;
+// the session ends when the remote side closes the connection.
+func pumpStdin(ws *wsWriter) {
 	buf := make([]byte, 32*1024)
 	for {
 		n, readErr := os.Stdin.Read(buf)
@@ -144,14 +165,13 @@ func pumpStdin(conn *websocket.Conn, errCh chan<- error) {
 			msg := make([]byte, 1+n)
 			msg[0] = streamStdin
 			copy(msg[1:], buf[:n])
-			if writeErr := conn.WriteMessage(websocket.BinaryMessage, msg); writeErr != nil {
-				errCh <- writeErr
+			if writeErr := ws.write(websocket.BinaryMessage, msg); writeErr != nil {
 				return
 			}
 		}
 		if readErr != nil {
-			_ = conn.WriteMessage(websocket.BinaryMessage, []byte{streamStdin})
-			errCh <- nil
+			// stdin closed; signal EOF to remote but keep the session alive
+			_ = ws.write(websocket.BinaryMessage, []byte{streamStdin})
 			return
 		}
 	}
@@ -218,7 +238,7 @@ func buildExecWebSocketURL(controlPlaneURL string, params ExecParams) (string, e
 	return u.String(), nil
 }
 
-func sendResize(conn *websocket.Conn, width, height uint16) {
+func sendResize(ws *wsWriter, width, height uint16) {
 	data, err := json.Marshal(terminalSize{Width: width, Height: height})
 	if err != nil {
 		return
@@ -226,10 +246,10 @@ func sendResize(conn *websocket.Conn, width, height uint16) {
 	msg := make([]byte, 1+len(data))
 	msg[0] = streamResize
 	copy(msg[1:], data)
-	_ = conn.WriteMessage(websocket.BinaryMessage, msg)
+	_ = ws.write(websocket.BinaryMessage, msg)
 }
 
-func watchResize(ctx context.Context, conn *websocket.Conn, fd int) {
+func watchResize(ctx context.Context, ws *wsWriter, fd int) {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGWINCH)
 	defer signal.Stop(ch)
@@ -240,7 +260,7 @@ func watchResize(ctx context.Context, conn *websocket.Conn, fd int) {
 			return
 		case <-ch:
 			if w, h, err := term.GetSize(fd); err == nil {
-				sendResize(conn, safeUint16(w), safeUint16(h))
+				sendResize(ws, safeUint16(w), safeUint16(h))
 			}
 		}
 	}

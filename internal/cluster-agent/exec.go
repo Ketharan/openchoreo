@@ -102,12 +102,16 @@ func (r *stdinPipeReader) Write(data []byte) {
 		r.mu.Unlock()
 		return
 	}
-	r.mu.Unlock()
-
+	// Hold the lock across the send so Close cannot close the channel concurrently.
+	// Use a select with a default to avoid blocking the agent tunnel if the
+	// consumer is slow; the Read side will drain the channel.
 	select {
 	case r.ch <- data:
 	default:
+		// Channel full — append to internal buffer so data is not lost.
+		r.buf = append(r.buf, data...)
 	}
+	r.mu.Unlock()
 }
 
 func (r *stdinPipeReader) Close() {
@@ -187,7 +191,7 @@ func (a *Agent) handleHTTPTunnelStreamInit(init *messaging.HTTPTunnelStreamInit)
 	tty := params.Get("tty") == "true"
 	stdin := params.Get("stdin") == "true"
 
-	logger = logger.With("pod", podName, "namespace", podNamespace, "commands", commands)
+	logger = logger.With("pod", podName, "namespace", podNamespace)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	session := newExecSession(init.RequestID, cancel)

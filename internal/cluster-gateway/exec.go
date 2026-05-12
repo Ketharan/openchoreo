@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -162,6 +163,12 @@ func (s *Server) handleExec(w http.ResponseWriter, r *http.Request) {
 		for {
 			_, msg, err := apiConn.ReadMessage()
 			if err != nil {
+				// Client disconnected — notify the agent so it can stop the exec.
+				closeChunk, _ := json.Marshal(&messaging.HTTPTunnelStreamChunk{
+					RequestID: requestID,
+					IsClose:   true,
+				})
+				_ = conn.SendRawMessage(closeChunk)
 				return
 			}
 			// Forward as a stream chunk to the agent
@@ -204,23 +211,22 @@ func (s *Server) handleExec(w http.ResponseWriter, r *http.Request) {
 }
 
 func buildK8sExecQuery(container string, commands []string, tty, stdin bool) string {
-	params := []string{
-		"stdout=true",
-		"stderr=true",
-	}
+	params := url.Values{}
+	params.Set("stdout", "true")
+	params.Set("stderr", "true")
 	if stdin {
-		params = append(params, "stdin=true")
+		params.Set("stdin", "true")
 	}
 	if tty {
-		params = append(params, "tty=true")
+		params.Set("tty", "true")
 	}
 	if container != "" {
-		params = append(params, "container="+container)
+		params.Set("container", container)
 	}
 	for _, cmd := range commands {
-		params = append(params, "command="+cmd)
+		params.Add("command", cmd)
 	}
-	return strings.Join(params, "&")
+	return params.Encode()
 }
 
 // registerStreamSession registers a stream session for receiving agent responses.
@@ -251,7 +257,8 @@ func (s *Server) handleStreamChunk(chunk *messaging.HTTPTunnelStreamChunk) {
 	select {
 	case session.fromAgent <- chunk:
 	case <-session.done:
-	default:
-		s.logger.Warn("Stream session channel full, dropping chunk", "requestID", chunk.RequestID)
+	case <-time.After(5 * time.Second):
+		s.logger.Warn("Stream session backpressure timeout, closing session", "requestID", chunk.RequestID)
+		session.close()
 	}
 }

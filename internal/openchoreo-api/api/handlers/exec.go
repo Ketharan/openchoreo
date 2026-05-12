@@ -112,7 +112,8 @@ func (h *ExecHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Exec session established")
 
 	// Bidirectional bridge: client ↔ gateway
-	done := make(chan struct{})
+	// Buffer of 2 so both goroutines can signal completion without blocking.
+	done := make(chan struct{}, 2)
 
 	// client → gateway
 	go func() {
