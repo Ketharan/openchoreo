@@ -47,12 +47,10 @@ func IsLoggedIn() bool {
 
 	if controlPlane != nil {
 		oidcConfig, err := FetchOIDCConfig(controlPlane.URL)
-		if err != nil {
-			return false
-		}
-		if !oidcConfig.SecurityEnabled {
+		if err == nil && !oidcConfig.SecurityEnabled {
 			return true
 		}
+		// If OIDC discovery fails, fall through to check stored token.
 	}
 
 	credential, err := config.GetCurrentCredential()

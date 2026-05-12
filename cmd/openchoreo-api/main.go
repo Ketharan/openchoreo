@@ -200,14 +200,6 @@ func main() {
 	// routes, so they share the same mux without an extra wrapping layer.
 	baseMux := http.NewServeMux()
 
-	// Exec WebSocket endpoint (registered before OpenAPI routes)
-	if cfg.ClusterGateway.Enabled && gatewayURL != "" {
-		execHandler := openapihandlers.NewExecHandler(k8sClient, gwClient, gatewayURL, logger)
-		execLoggerMw := apilogger.LoggerMiddleware(logger.With("component", "exec"))
-		baseMux.Handle("/exec/", middleware.Chain(execLoggerMw, jwtMiddleware)(execHandler))
-		logger.Info("Exec endpoint registered", "path", "/exec/namespaces/{ns}/components/{name}")
-	}
-
 	// MCP endpoint (only if enabled)
 	if cfg.MCP.Enabled {
 		mcpLogger := logger.With("component", "mcp")
@@ -236,8 +228,21 @@ func main() {
 		Middlewares: []gen.MiddlewareFunc{openapihandlers.WebhookRawBodyMiddleware, authMiddleware, loggerMiddleware},
 	})
 
+	// Exec WebSocket endpoint is registered on a top-level mux that wraps the
+	// OpenAPI handler. This keeps exec outside the OpenAPI middleware chain whose
+	// ResponseWriter wrappers break http.Hijacker (required for WebSocket upgrade).
+	var topHandler http.Handler = handler
+	if cfg.ClusterGateway.Enabled && gatewayURL != "" {
+		execHandler := openapihandlers.NewExecHandler(k8sClient, gwClient, gatewayURL, logger)
+		topMux := http.NewServeMux()
+		topMux.Handle("/exec/", execHandler)
+		topMux.Handle("/", handler)
+		topHandler = topMux
+		logger.Info("Exec endpoint registered", "path", "/exec/namespaces/{ns}/components/{name}")
+	}
+
 	// Create server from configuration
-	srv := server.New(cfg.Server.ToServerConfig(), handler, logger)
+	srv := server.New(cfg.Server.ToServerConfig(), topHandler, logger)
 
 	// Start server
 	if err := srv.Run(ctx); err != nil {
