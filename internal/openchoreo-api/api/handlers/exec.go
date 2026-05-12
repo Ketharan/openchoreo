@@ -134,6 +134,9 @@ func (h *ExecHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		for {
 			msgType, msg, err := gwConn.ReadMessage()
 			if err != nil {
+				// Gateway closed — send a clean close frame to the CLI
+				_ = clientConn.WriteMessage(websocket.CloseMessage,
+					websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 				return
 			}
 			if err := clientConn.WriteMessage(msgType, msg); err != nil {

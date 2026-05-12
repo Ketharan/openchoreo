@@ -39,24 +39,50 @@ func (cp *Component) Exec(params ExecParams) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	controlPlane, err := config.GetCurrentControlPlane()
-	if err != nil {
-		return fmt.Errorf("failed to get control plane: %w", err)
-	}
-
-	credential, err := config.GetCurrentCredential()
-	if err != nil {
-		return fmt.Errorf("failed to get credential: %w", err)
-	}
-
 	// Default command to /bin/sh
 	if len(params.Command) == 0 {
 		params.Command = []string{"/bin/sh"}
 	}
 
+	conn, err := dialExecWebSocket(ctx, params)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	// Put terminal in raw mode for interactive TTY sessions
+	fd := int(os.Stdin.Fd())
+	if term.IsTerminal(fd) && params.TTY {
+		oldState, rawErr := term.MakeRaw(fd)
+		if rawErr != nil {
+			return fmt.Errorf("failed to set raw terminal mode: %w", rawErr)
+		}
+		defer func() { _ = term.Restore(fd, oldState) }()
+
+		if w, h, sizeErr := term.GetSize(fd); sizeErr == nil {
+			sendResize(conn, safeUint16(w), safeUint16(h))
+		}
+		go watchResize(ctx, conn, fd)
+	}
+
+	return streamExecIO(ctx, conn, params.Stdin)
+}
+
+// dialExecWebSocket establishes a WebSocket connection to the exec endpoint.
+func dialExecWebSocket(ctx context.Context, params ExecParams) (*websocket.Conn, error) {
+	controlPlane, err := config.GetCurrentControlPlane()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get control plane: %w", err)
+	}
+
+	credential, err := config.GetCurrentCredential()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get credential: %w", err)
+	}
+
 	wsURL, err := buildExecWebSocketURL(controlPlane.URL, params)
 	if err != nil {
-		return fmt.Errorf("failed to build exec URL: %w", err)
+		return nil, fmt.Errorf("failed to build exec URL: %w", err)
 	}
 
 	headers := http.Header{}
@@ -65,100 +91,92 @@ func (cp *Component) Exec(params ExecParams) error {
 		if auth.IsTokenExpired(currentToken) {
 			newToken, refreshErr := auth.RefreshToken()
 			if refreshErr != nil {
-				return fmt.Errorf("failed to refresh token: %w", refreshErr)
+				return nil, fmt.Errorf("failed to refresh token: %w", refreshErr)
 			}
 			currentToken = newToken
 		}
 		headers.Set("Authorization", "Bearer "+currentToken)
 	}
 
-	dialer := websocket.Dialer{}
-	conn, resp, err := dialer.DialContext(ctx, wsURL, headers)
+	conn, resp, err := websocket.DefaultDialer.DialContext(ctx, wsURL, headers)
 	if err != nil {
 		if resp != nil && resp.StatusCode != http.StatusSwitchingProtocols {
-			return fmt.Errorf("exec connection failed (HTTP %d): %w", resp.StatusCode, err)
+			return nil, fmt.Errorf("exec connection failed (HTTP %d): %w", resp.StatusCode, err)
 		}
-		return fmt.Errorf("failed to connect to exec endpoint: %w", err)
+		return nil, fmt.Errorf("failed to connect to exec endpoint: %w", err)
 	}
-	defer conn.Close()
+	return conn, nil
+}
 
-	// Put terminal in raw mode for interactive TTY sessions
-	fd := int(os.Stdin.Fd())
-	isTerminal := term.IsTerminal(fd)
-	if isTerminal && params.TTY {
-		oldState, rawErr := term.MakeRaw(fd)
-		if rawErr != nil {
-			return fmt.Errorf("failed to set raw terminal mode: %w", rawErr)
-		}
-		defer func() { _ = term.Restore(fd, oldState) }()
-
-		// Send initial terminal size
-		if w, h, sizeErr := term.GetSize(fd); sizeErr == nil {
-			sendResize(conn, safeUint16(w), safeUint16(h))
-		}
-
-		// Watch for terminal resize signals
-		go watchResize(ctx, conn, fd)
-	}
-
+// streamExecIO pumps stdin/stdout/stderr between the local terminal and
+// the remote WebSocket exec session.
+func streamExecIO(ctx context.Context, conn *websocket.Conn, attachStdin bool) error {
 	errCh := make(chan error, 2)
 
-	// Pump stdin → WebSocket
-	if params.Stdin {
-		go func() {
-			buf := make([]byte, 32*1024)
-			for {
-				n, readErr := os.Stdin.Read(buf)
-				if n > 0 {
-					msg := make([]byte, 1+n)
-					msg[0] = streamStdin
-					copy(msg[1:], buf[:n])
-					if writeErr := conn.WriteMessage(websocket.BinaryMessage, msg); writeErr != nil {
-						errCh <- writeErr
-						return
-					}
-				}
-				if readErr != nil {
-					// stdin closed; signal EOF to remote
-					_ = conn.WriteMessage(websocket.BinaryMessage, []byte{streamStdin})
-					errCh <- nil
-					return
-				}
-			}
-		}()
+	if attachStdin {
+		go pumpStdin(conn, errCh)
 	}
 
-	// Pump WebSocket → stdout/stderr
-	go func() {
-		for {
-			_, msg, readErr := conn.ReadMessage()
-			if readErr != nil {
-				errCh <- readErr
-				return
-			}
-			if len(msg) < 2 {
-				continue
-			}
-			switch msg[0] {
-			case streamStdout:
-				_, _ = os.Stdout.Write(msg[1:])
-			case streamStderr:
-				_, _ = os.Stderr.Write(msg[1:])
-			}
-		}
-	}()
+	go pumpStdout(conn, errCh)
 
 	select {
 	case err := <-errCh:
-		if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+		if err == nil {
 			return nil
 		}
-		if err != nil {
-			return err
+		if websocket.IsCloseError(err,
+			websocket.CloseNormalClosure,
+			websocket.CloseGoingAway,
+			websocket.CloseAbnormalClosure) {
+			return nil
 		}
-		return nil
+		return err
 	case <-ctx.Done():
 		return nil
+	}
+}
+
+func pumpStdin(conn *websocket.Conn, errCh chan<- error) {
+	buf := make([]byte, 32*1024)
+	for {
+		n, readErr := os.Stdin.Read(buf)
+		if n > 0 {
+			msg := make([]byte, 1+n)
+			msg[0] = streamStdin
+			copy(msg[1:], buf[:n])
+			if writeErr := conn.WriteMessage(websocket.BinaryMessage, msg); writeErr != nil {
+				errCh <- writeErr
+				return
+			}
+		}
+		if readErr != nil {
+			_ = conn.WriteMessage(websocket.BinaryMessage, []byte{streamStdin})
+			errCh <- nil
+			return
+		}
+	}
+}
+
+func pumpStdout(conn *websocket.Conn, errCh chan<- error) {
+	for {
+		msgType, msg, readErr := conn.ReadMessage()
+		if readErr != nil {
+			errCh <- readErr
+			return
+		}
+		if msgType == websocket.CloseMessage {
+			errCh <- nil
+			return
+		}
+		if len(msg) < 2 {
+			continue
+		}
+		switch msg[0] {
+		case streamStdout:
+			_, _ = os.Stdout.Write(msg[1:])
+		case streamStderr:
+			_, _ = os.Stderr.Write(msg[1:])
+		}
 	}
 }
 
