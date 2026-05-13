@@ -150,7 +150,7 @@ func streamExecIO(ctx context.Context, ws *wsWriter, conn *websocket.Conn, attac
 		}
 		return err
 	case <-ctx.Done():
-		return nil
+		return ctx.Err()
 	}
 }
 

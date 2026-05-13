@@ -7,6 +7,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -135,9 +136,16 @@ func (h *ExecHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		for {
 			msgType, msg, err := gwConn.ReadMessage()
 			if err != nil {
-				// Gateway closed — send a clean close frame to the CLI
+				// Gateway closed — forward the close status to the CLI.
+				closeCode := websocket.CloseNormalClosure
+				closeText := ""
+				var ce *websocket.CloseError
+				if errors.As(err, &ce) {
+					closeCode = ce.Code
+					closeText = ce.Text
+				}
 				_ = clientConn.WriteMessage(websocket.CloseMessage,
-					websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+					websocket.FormatCloseMessage(closeCode, closeText))
 				return
 			}
 			if err := clientConn.WriteMessage(msgType, msg); err != nil {
