@@ -76,7 +76,7 @@ func (h *ExecHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Authorize: check that the caller has component:view permission.
 	if h.authzChecker != nil {
 		if err := h.authzChecker.Check(ctx, svcpkg.CheckRequest{
-			Action:       authz.ActionViewComponent,
+			Action:       authz.ActionExecComponent,
 			ResourceType: "component",
 			ResourceID:   componentName,
 			Hierarchy: authz.ResourceHierarchy{

@@ -41,6 +41,7 @@ const (
 	ActionViewComponent   = "component:view"
 	ActionUpdateComponent = "component:update"
 	ActionDeleteComponent = "component:delete"
+	ActionExecComponent   = "component:exec"
 
 	// Resource actions
 	ActionCreateResource = "resource:create"
@@ -275,6 +276,7 @@ var systemActions = []Action{
 	{Name: ActionViewComponent, LowestScope: ScopeComponent, IsInternal: false},
 	{Name: ActionUpdateComponent, LowestScope: ScopeComponent, IsInternal: false},
 	{Name: ActionDeleteComponent, LowestScope: ScopeComponent, IsInternal: false},
+	{Name: ActionExecComponent, LowestScope: ScopeComponent, IsInternal: false},
 
 	// Resource
 	{Name: ActionCreateResource, LowestScope: ScopeProject, IsInternal: false},
