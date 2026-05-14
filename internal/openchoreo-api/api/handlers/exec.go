@@ -19,8 +19,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openchoreov1alpha1 "github.com/openchoreo/openchoreo/api/v1alpha1"
+	authz "github.com/openchoreo/openchoreo/internal/authz/core"
 	gatewayClient "github.com/openchoreo/openchoreo/internal/clients/gateway"
 	"github.com/openchoreo/openchoreo/internal/controller"
+	svcpkg "github.com/openchoreo/openchoreo/internal/openchoreo-api/services"
 )
 
 // ExecHandler handles WebSocket exec requests for component pods.
@@ -28,15 +30,17 @@ type ExecHandler struct {
 	k8sClient     client.Client
 	gatewayClient *gatewayClient.Client
 	gatewayURL    string
+	authzChecker  *svcpkg.AuthzChecker
 	logger        *slog.Logger
 }
 
 // NewExecHandler creates a new exec handler.
-func NewExecHandler(k8sClient client.Client, gwClient *gatewayClient.Client, gatewayURL string, logger *slog.Logger) *ExecHandler {
+func NewExecHandler(k8sClient client.Client, gwClient *gatewayClient.Client, gatewayURL string, authzChecker *svcpkg.AuthzChecker, logger *slog.Logger) *ExecHandler {
 	return &ExecHandler{
 		k8sClient:     k8sClient,
 		gatewayClient: gwClient,
 		gatewayURL:    gatewayURL,
+		authzChecker:  authzChecker,
 		logger:        logger.With("component", "exec-handler"),
 	}
 }
@@ -68,6 +72,27 @@ func (h *ExecHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	logger := h.logger.With("namespace", namespace, "component", componentName)
+
+	// Authorize: check that the caller has component:view permission.
+	if h.authzChecker != nil {
+		if err := h.authzChecker.Check(ctx, svcpkg.CheckRequest{
+			Action:       authz.ActionViewComponent,
+			ResourceType: "component",
+			ResourceID:   componentName,
+			Hierarchy: authz.ResourceHierarchy{
+				Namespace: namespace,
+				Project:   project,
+			},
+		}); err != nil {
+			if errors.Is(err, svcpkg.ErrForbidden) {
+				http.Error(w, "you do not have permission to exec into this component", http.StatusForbidden)
+				return
+			}
+			logger.Error("Authorization check failed", "error", err)
+			http.Error(w, "authorization check failed", http.StatusInternalServerError)
+			return
+		}
+	}
 
 	// Resolve the pod to exec into
 	podInfo, err := h.resolvePod(ctx, namespace, componentName, project, envName)
