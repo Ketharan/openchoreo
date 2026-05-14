@@ -231,11 +231,13 @@ func main() {
 	// Exec WebSocket endpoint is registered on a top-level mux that wraps the
 	// OpenAPI handler. This keeps exec outside the OpenAPI middleware chain whose
 	// ResponseWriter wrappers break http.Hijacker (required for WebSocket upgrade).
+	// The JWT middleware is applied directly to the exec handler for authentication.
 	var topHandler http.Handler = handler
 	if cfg.ClusterGateway.Enabled && gatewayURL != "" {
 		execHandler := openapihandlers.NewExecHandler(k8sClient, gwClient, gatewayURL, logger)
+		authedExecHandler := jwtMiddleware(execHandler)
 		topMux := http.NewServeMux()
-		topMux.Handle("/exec/", execHandler)
+		topMux.Handle("/exec/", authedExecHandler)
 		topMux.Handle("/", handler)
 		topHandler = topMux
 		logger.Info("Exec endpoint registered", "path", "/exec/namespaces/{ns}/components/{name}")
