@@ -73,8 +73,13 @@ func (h *ExecHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := h.logger.With("namespace", namespace, "component", componentName)
 
-	// Authorize: check that the caller has component:view permission.
-	if h.authzChecker != nil {
+	// Authorize: check that the caller has component:exec permission.
+	if h.authzChecker == nil {
+		logger.Error("Authorization checker not configured")
+		http.Error(w, "authorization not configured", http.StatusInternalServerError)
+		return
+	}
+	{
 		if err := h.authzChecker.Check(ctx, svcpkg.CheckRequest{
 			Action:       authz.ActionExecComponent,
 			ResourceType: "component",

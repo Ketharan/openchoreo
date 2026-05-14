@@ -233,7 +233,7 @@ func main() {
 	// OpenAPI handler. This keeps exec outside the OpenAPI middleware chain whose
 	// ResponseWriter wrappers break http.Hijacker (required for WebSocket upgrade).
 	// The JWT middleware is applied directly to the exec handler for authentication.
-	// Authorization is enforced inside the handler via AuthzChecker (component:view).
+	// Authorization is enforced inside the handler via AuthzChecker (component:exec).
 	var topHandler http.Handler = handler
 	if cfg.ClusterGateway.Enabled && gatewayURL != "" {
 		execAuthzChecker := svcpkg.NewAuthzChecker(runtime.pdp, logger.With("component", "exec-authz"))
