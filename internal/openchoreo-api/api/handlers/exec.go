@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -27,21 +28,23 @@ import (
 
 // ExecHandler handles WebSocket exec requests for component pods.
 type ExecHandler struct {
-	k8sClient     client.Client
-	gatewayClient *gatewayClient.Client
-	gatewayURL    string
-	authzChecker  *svcpkg.AuthzChecker
-	logger        *slog.Logger
+	k8sClient      client.Client
+	gatewayClient  *gatewayClient.Client
+	gatewayURL     string
+	gatewayTLSConf *tls.Config
+	authzChecker   *svcpkg.AuthzChecker
+	logger         *slog.Logger
 }
 
 // NewExecHandler creates a new exec handler.
-func NewExecHandler(k8sClient client.Client, gwClient *gatewayClient.Client, gatewayURL string, authzChecker *svcpkg.AuthzChecker, logger *slog.Logger) *ExecHandler {
+func NewExecHandler(k8sClient client.Client, gwClient *gatewayClient.Client, gatewayURL string, gwTLSConf *tls.Config, authzChecker *svcpkg.AuthzChecker, logger *slog.Logger) *ExecHandler {
 	return &ExecHandler{
-		k8sClient:     k8sClient,
-		gatewayClient: gwClient,
-		gatewayURL:    gatewayURL,
-		authzChecker:  authzChecker,
-		logger:        logger.With("component", "exec-handler"),
+		k8sClient:      k8sClient,
+		gatewayClient:  gwClient,
+		gatewayURL:     gatewayURL,
+		gatewayTLSConf: gwTLSConf,
+		authzChecker:   authzChecker,
+		logger:         logger.With("component", "exec-handler"),
 	}
 }
 
@@ -118,6 +121,12 @@ func (h *ExecHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer clientConn.Close()
 
+	// Clear the underlying connection deadline so the HTTP server's
+	// WriteTimeout/ReadTimeout don't kill the long-lived WebSocket session.
+	if netConn := clientConn.UnderlyingConn(); netConn != nil {
+		_ = netConn.SetDeadline(time.Time{})
+	}
+
 	// Build gateway exec WebSocket URL
 	gwExecURL, err := h.buildGatewayExecURL(podInfo, container, commands, tty, stdin)
 	if err != nil {
@@ -126,11 +135,9 @@ func (h *ExecHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Connect to gateway exec WebSocket
+	// Connect to gateway exec WebSocket using the same TLS config as the gateway client.
 	gwDialer := websocket.Dialer{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true, //nolint:gosec // Gateway is internal, matches existing gateway client config
-		},
+		TLSClientConfig: h.gatewayTLSConf,
 	}
 	gwConn, _, err := gwDialer.DialContext(ctx, gwExecURL, nil)
 	if err != nil {
