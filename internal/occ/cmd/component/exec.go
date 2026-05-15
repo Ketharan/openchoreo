@@ -249,8 +249,6 @@ func sendResize(ws *wsWriter, width, height uint16) {
 	_ = ws.write(websocket.BinaryMessage, msg)
 }
 
-// watchResize is defined in exec_resize_unix.go and exec_resize_windows.go
-
 func safeUint16(v int) uint16 {
 	if v < 0 {
 		return 0
