@@ -249,23 +249,6 @@ func sendResize(ws *wsWriter, width, height uint16) {
 	_ = ws.write(websocket.BinaryMessage, msg)
 }
 
-func watchResize(ctx context.Context, ws *wsWriter, fd int) {
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, syscall.SIGWINCH)
-	defer signal.Stop(ch)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-ch:
-			if w, h, err := term.GetSize(fd); err == nil {
-				sendResize(ws, safeUint16(w), safeUint16(h))
-			}
-		}
-	}
-}
-
 func safeUint16(v int) uint16 {
 	if v < 0 {
 		return 0
