@@ -108,7 +108,7 @@ is action-centric and lives outside `DeploymentPipeline`. Reintroducing a boolea
 |---|---|
 | **API (`openchoreo-api`)** | 9 new endpoints; enforcement in the `releasebinding` authz wrapper; 2 new services. |
 | **CRDs** | 2 new namespaced kinds. No changes to existing kinds. |
-| **Authz** | 8 new actions, `resource.environment` conditions registered for approval actions, and a new `Approvable` flag on the action registry. |
+| **Authz** | 8 new actions; `resource.environment` conditions registered for approval actions; a `request.action` condition dimension on `approvalrequest:decide`; and approval semantics (`OnApproval`, `AllowParallelRequests`, `ApproverForms`) on the action registry. |
 | **CLI (`occ`)** | New `occ approval` command tree (`list`, `get`, `approve`, `reject`, `cancel`, `policy …`). |
 | **Audit** | 5 new audited operations, generated from the spec. Categorised as `CategoryAuthorization`. |
 | **Controllers** | None in this increment; an `ApprovalRequest` controller is required as a follow-up (see *Deferred*). |
@@ -153,11 +153,27 @@ spec:
 ```
 
 **`ApprovalRequest`** — one pending decision. Modelled on `WorkflowRun`: a run-instance kind with a
-terminal state and a TTL, because that is the same lifecycle. Every field except `decision` is
-immutable — an approver must not review one change while a different one executes.
+terminal state and a TTL, because that is the same lifecycle. Every field except `decision` and
+`cancellation` is immutable — an approver must not review one change while a different one executes.
 
 Phases: `Pending → Approved → Executed`, or `Pending → Rejected | Cancelled`. `Approved` and
-`Executed` are distinct because approving and performing are distinct events (see *Open question 2*).
+`Executed` are distinct because approving and performing are distinct events; which of them is
+automatic is a property of the action, not of the policy (see *The action registry* below).
+
+A request carries a **snapshot of the approver set** — `spec.approvers` and `spec.allowSelfApproval`,
+copied from the policy at creation, alongside `spec.policyName` for provenance. The decision is
+evaluated against the snapshot, never against the live policy. Without this, a subject holding
+`approvalpolicy:update` can watch a request open, add themselves to the policy's approvers, and
+approve it; or flip `allowSelfApproval` to `true` and approve their own. Copying the approver set is
+the same reasoning that already copies `action` and `ttlAfterCompletion` — the difference is that
+here it is a security property rather than a display one, and it means a policy edit changes who may
+approve *future* requests only.
+
+**Cancellation is recorded, not merely reached.** `spec.cancellation` holds who withdrew the request,
+when, and optionally why, mirroring `spec.decision`. A request that simply arrived at phase
+`Cancelled` with no actor would let anyone holding `approvalrequest:cancel` kill a pending production
+approval and leave nothing on the object; the phase alone is not an audit trail, and the object
+outlives the API-layer audit event in the common case where an operator is reading the CR.
 
 ### Two classes of gated action
 
@@ -229,16 +245,73 @@ lookup cannot reconstruct.
 is necessary but not sufficient: the policy's `approvers` list is the real check, enforced in the
 service.
 
+### The action registry carries approval semantics
+
+`spec.action` on a policy is validated against a registry of approval-capable actions in
+`internal/authz/core/actions.go`. Gating an action with no enforcement point would produce a policy
+that appears to work and never fires, which is precisely the failure #2650 removed.
+
+That registration is **not** a boolean. Several properties of a gated action are fixed by the action
+itself and must not be a per-tenant choice:
+
+```go
+// Approval, when non-nil, declares that this action may be gated, and how it
+// behaves when it is. Nil means the action has no enforcement point.
+type ActionApproval struct {
+    // OnApproval says whether an approval performs the action or unlocks a retry.
+    // Retry for reconciled actions, Execute for synchronous ones. Not a policy
+    // field: a policy author choosing Execute for a reconciled action would be
+    // asking the platform for something it cannot do.
+    OnApproval OnApprovalMode // Retry | Execute
+
+    // AllowParallelRequests permits more than one pending request against the same
+    // target. False for promotion: two pending requests for different releases on
+    // one binding is a race, and an approver has no way to see they are choosing.
+    AllowParallelRequests bool
+
+    // ApproverForms lists which ApproverRef forms this action supports. An action
+    // whose approvers cannot be resolved for a given form must not accept a policy
+    // written in that form — the policy would install, gate, and deadlock.
+    ApproverForms []ApproverForm // Role, Entitlement
+}
+```
+
+`releasebinding:update` registers as `{OnApproval: Retry, AllowParallelRequests: false}` — retry
+because promotion is a reconciled action, as *Two classes of gated action* sets out. A synchronous
+action such as an API subscription would register `Execute`. Putting this on the action is what makes
+the goal "adding a second gated action requires registration plus one enforcement call" true; putting
+it on the policy would make every new action a CRD change and let a tenant configure an incoherent
+combination.
+
+`ApproverForms` is also the validation hook that closes an otherwise silent failure: an approver form
+the platform cannot resolve is rejected at policy admission rather than discovered by a developer
+whose promotion is gated and unapprovable.
+
 ### Authorization actions
 
-`approvalpolicy:{create,view,update,delete}` and
-`approvalrequest:{create,view,cancel,decide}`, each with `resource.environment` registered so "may
-approve promotions into production" is expressible with the CEL conditions that already exist.
+`approvalpolicy:{create,view,update,delete}` and `approvalrequest:{create,view,cancel,decide}`, each
+with `resource.environment` registered so "may approve promotions into production" is expressible
+with the CEL conditions that already exist.
 
-`spec.action` on a policy is validated against a registry of approval-capable actions — a new
-`Approvable` flag on the existing `Action` metadata in `internal/authz/core/actions.go`. Gating an
-action with no enforcement point would produce a policy that appears to work and never fires, which
-is precisely the failure #2650 removed. Only `releasebinding:update` is approvable today.
+`approvalrequest:decide` additionally registers a **`request.action`** condition dimension, so the
+right to approve is grantable per gated action:
+
+```yaml
+# may approve promotions into production, and nothing else
+roleRef: { kind: ClusterAuthzRole, name: release-manager }
+conditions:
+  - expression: 'request.action == "releasebinding:update" && resource.environment == "production"'
+```
+
+A single undifferentiated `approvalrequest:decide` would mean that granting someone the right to
+approve promotions also grants them the right to approve every action that later becomes gateable —
+and the premise of this proposal is that the gated set grows. `Context` in
+`internal/authz/core/types.go` already anticipates additional condition roots as an additive change,
+so this needs a registry entry rather than a new mechanism.
+
+The alternative — minting a distinct approve action per gated action — was rejected: it doubles the
+registry with every new gated action and forces every role definition to be revisited each time,
+where a condition dimension composes with the environment scoping that already exists.
 
 ### Audit
 
@@ -256,13 +329,15 @@ answers but they are not agreed. A full list is maintained alongside the epic.
 1. **Does approval gate people who already hold the permission, or grant it to people who do not?**
    The implementation assumes the former — approval is a *second* check, and the requester's own
    authorization is still required. This shapes who may request, and what break-glass means.
-2. **Does approval execute the action, or unlock a retry?** The implementation unlocks a retry
-   (as Choreo does). Executing on approval is better UX — nobody expects to approve a deploy and have
-   nothing deploy — but it requires the platform to act on the requester's behalf after their session
-   ends, and re-checking their permission then would require storing their entitlement claims on the
-   request, with the staleness and disclosure that implies. Retry is the only mode where the action
-   runs under a live, current authorization for the person it is attributed to. Recommended as a
-   later `spec.onApproval: Retry|Execute` field, defaulting to `Retry`.
+2. **Does approval execute the action, or unlock a retry?** Settled as a property of the action
+   rather than of the policy — `ActionApproval.OnApproval`, above. `releasebinding:update` registers
+   `Retry`, because a reconciled action's gate withholds actuation and the requester's retry is what
+   actuates; a synchronous action would register `Execute`. What remains open is narrower: whether
+   `Execute` is offered at all in the first increment. Executing on approval is better UX — nobody
+   expects to approve a deploy and have nothing deploy — but it requires the platform to act on the
+   requester's behalf after their session ends, and re-checking their permission then means storing
+   their entitlement claims on the request, with the staleness and disclosure that implies. Retry is
+   the only mode where the action runs under a live authorization for the person it is attributed to.
 3. **Notification recipients**, given no user directory. A webhook channel routing into where
    approvers already are is the honest primitive; a policy with no reachable target should be flagged
    at configuration time.
@@ -274,7 +349,12 @@ answers but they are not agreed. A full list is maintained alongside the epic.
    (`internal/authz/disabled_authorizer.go`). Without an audited override, incident response will
    route around the feature. Silently degrading to no-gate is the worst outcome.
 6. **Self-protection.** Anyone holding `approvalpolicy:update` can set `suspend: true` and promote
-   freely. A governance control with an unguarded off switch needs a non-deadlocking answer.
+   freely. A governance control with an unguarded off switch needs a non-deadlocking answer. The
+   approver snapshot on the request (above) closes the retroactive half of this — a policy edit can no
+   longer change who may decide a request that is already open — but not the prospective half: suspend
+   still stops the gate firing at all. Candidates are gating `approvalpolicy:update` behind an
+   approval policy of its own (`approvalpolicy:update` becomes approvable, which the registry already
+   allows for), or making suspension itself an audited, time-bounded state rather than a boolean.
 
 ---
 
@@ -297,14 +377,18 @@ Deliberately not in this proposal, and required before the feature is complete:
 
 ### Reference implementation
 
-A working implementation of the model above accompanies this proposal, covering the CRDs, the authz
-actions and registry, the gate, request creation, the REST API and the `occ` command tree. It builds
-against the current tree, follows the repo's codegen and audit gates, and includes unit tests for the
-gate's security properties — replay prevention, terminal-request handling, suspend, and change
+A working implementation accompanies this proposal, covering the CRDs, the authz actions and
+registry, the gate, request creation, the REST API and the `occ` command tree. It builds against the
+current tree, follows the repo's codegen and audit gates, and includes unit tests for the gate's
+security properties — replay prevention, terminal-request handling, suspend, and change
 classification.
 
-It is a reference for the design discussion, not a merge candidate: the gaps in *Deferred* above,
-and the absence of service- and handler-level tests, are known.
+It is a reference for the design discussion, not a merge candidate. Beyond the gaps in *Deferred*
+above and the absence of service- and handler-level tests, it predates four decisions recorded here
+and does not yet implement them: the approver snapshot on the request, the recorded cancellation, the
+`request.action` condition dimension, and `ActionApproval` on the action registry (it carries a plain
+`Approvable` boolean instead). Each is a small change, and all four are worth making before any of
+this is released, since they alter the CRDs.
 
 ### Prior art
 
