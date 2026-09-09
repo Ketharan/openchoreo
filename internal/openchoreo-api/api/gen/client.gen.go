@@ -330,6 +330,39 @@ type ClientInterface interface {
 
 	UpdateNamespace(ctx context.Context, namespaceName NamespaceNameParam, body UpdateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ListApprovalPolicies request
+	ListApprovalPolicies(ctx context.Context, namespaceName NamespaceNameParam, params *ListApprovalPoliciesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateApprovalPolicyWithBody request with any body
+	CreateApprovalPolicyWithBody(ctx context.Context, namespaceName NamespaceNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateApprovalPolicy(ctx context.Context, namespaceName NamespaceNameParam, body CreateApprovalPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteApprovalPolicy request
+	DeleteApprovalPolicy(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetApprovalPolicy request
+	GetApprovalPolicy(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateApprovalPolicyWithBody request with any body
+	UpdateApprovalPolicyWithBody(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateApprovalPolicy(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, body UpdateApprovalPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListApprovalRequests request
+	ListApprovalRequests(ctx context.Context, namespaceName NamespaceNameParam, params *ListApprovalRequestsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetApprovalRequest request
+	GetApprovalRequest(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CancelApprovalRequest request
+	CancelApprovalRequest(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DecideApprovalRequestWithBody request with any body
+	DecideApprovalRequestWithBody(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DecideApprovalRequest(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, body DecideApprovalRequestJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ListNamespaceRoleBindings request
 	ListNamespaceRoleBindings(ctx context.Context, namespaceName NamespaceNameParam, params *ListNamespaceRoleBindingsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1930,6 +1963,150 @@ func (c *Client) UpdateNamespaceWithBody(ctx context.Context, namespaceName Name
 
 func (c *Client) UpdateNamespace(ctx context.Context, namespaceName NamespaceNameParam, body UpdateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateNamespaceRequest(c.Server, namespaceName, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ListApprovalPolicies(ctx context.Context, namespaceName NamespaceNameParam, params *ListApprovalPoliciesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListApprovalPoliciesRequest(c.Server, namespaceName, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateApprovalPolicyWithBody(ctx context.Context, namespaceName NamespaceNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateApprovalPolicyRequestWithBody(c.Server, namespaceName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateApprovalPolicy(ctx context.Context, namespaceName NamespaceNameParam, body CreateApprovalPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateApprovalPolicyRequest(c.Server, namespaceName, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteApprovalPolicy(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteApprovalPolicyRequest(c.Server, namespaceName, approvalPolicyName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetApprovalPolicy(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApprovalPolicyRequest(c.Server, namespaceName, approvalPolicyName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateApprovalPolicyWithBody(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateApprovalPolicyRequestWithBody(c.Server, namespaceName, approvalPolicyName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateApprovalPolicy(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, body UpdateApprovalPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateApprovalPolicyRequest(c.Server, namespaceName, approvalPolicyName, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ListApprovalRequests(ctx context.Context, namespaceName NamespaceNameParam, params *ListApprovalRequestsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListApprovalRequestsRequest(c.Server, namespaceName, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetApprovalRequest(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetApprovalRequestRequest(c.Server, namespaceName, approvalRequestName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CancelApprovalRequest(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCancelApprovalRequestRequest(c.Server, namespaceName, approvalRequestName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DecideApprovalRequestWithBody(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDecideApprovalRequestRequestWithBody(c.Server, namespaceName, approvalRequestName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DecideApprovalRequest(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, body DecideApprovalRequestJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDecideApprovalRequestRequest(c.Server, namespaceName, approvalRequestName, body)
 	if err != nil {
 		return nil, err
 	}
@@ -7339,6 +7516,501 @@ func NewUpdateNamespaceRequestWithBody(server string, namespaceName NamespaceNam
 	}
 
 	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewListApprovalPoliciesRequest generates requests for ListApprovalPolicies
+func NewListApprovalPoliciesRequest(server string, namespaceName NamespaceNameParam, params *ListApprovalPoliciesParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespaceName", runtime.ParamLocationPath, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/namespaces/%s/approvalpolicies", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateApprovalPolicyRequest calls the generic CreateApprovalPolicy builder with application/json body
+func NewCreateApprovalPolicyRequest(server string, namespaceName NamespaceNameParam, body CreateApprovalPolicyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateApprovalPolicyRequestWithBody(server, namespaceName, "application/json", bodyReader)
+}
+
+// NewCreateApprovalPolicyRequestWithBody generates requests for CreateApprovalPolicy with any type of body
+func NewCreateApprovalPolicyRequestWithBody(server string, namespaceName NamespaceNameParam, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespaceName", runtime.ParamLocationPath, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/namespaces/%s/approvalpolicies", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteApprovalPolicyRequest generates requests for DeleteApprovalPolicy
+func NewDeleteApprovalPolicyRequest(server string, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespaceName", runtime.ParamLocationPath, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "approvalPolicyName", runtime.ParamLocationPath, approvalPolicyName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/namespaces/%s/approvalpolicies/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetApprovalPolicyRequest generates requests for GetApprovalPolicy
+func NewGetApprovalPolicyRequest(server string, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespaceName", runtime.ParamLocationPath, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "approvalPolicyName", runtime.ParamLocationPath, approvalPolicyName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/namespaces/%s/approvalpolicies/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateApprovalPolicyRequest calls the generic UpdateApprovalPolicy builder with application/json body
+func NewUpdateApprovalPolicyRequest(server string, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, body UpdateApprovalPolicyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateApprovalPolicyRequestWithBody(server, namespaceName, approvalPolicyName, "application/json", bodyReader)
+}
+
+// NewUpdateApprovalPolicyRequestWithBody generates requests for UpdateApprovalPolicy with any type of body
+func NewUpdateApprovalPolicyRequestWithBody(server string, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespaceName", runtime.ParamLocationPath, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "approvalPolicyName", runtime.ParamLocationPath, approvalPolicyName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/namespaces/%s/approvalpolicies/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewListApprovalRequestsRequest generates requests for ListApprovalRequests
+func NewListApprovalRequestsRequest(server string, namespaceName NamespaceNameParam, params *ListApprovalRequestsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespaceName", runtime.ParamLocationPath, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/namespaces/%s/approvalrequests", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Phase != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "phase", runtime.ParamLocationQuery, *params.Phase); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Environment != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "environment", runtime.ParamLocationQuery, *params.Environment); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Cursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetApprovalRequestRequest generates requests for GetApprovalRequest
+func NewGetApprovalRequestRequest(server string, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespaceName", runtime.ParamLocationPath, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "approvalRequestName", runtime.ParamLocationPath, approvalRequestName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/namespaces/%s/approvalrequests/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCancelApprovalRequestRequest generates requests for CancelApprovalRequest
+func NewCancelApprovalRequestRequest(server string, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespaceName", runtime.ParamLocationPath, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "approvalRequestName", runtime.ParamLocationPath, approvalRequestName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/namespaces/%s/approvalrequests/%s/cancel", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDecideApprovalRequestRequest calls the generic DecideApprovalRequest builder with application/json body
+func NewDecideApprovalRequestRequest(server string, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, body DecideApprovalRequestJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDecideApprovalRequestRequestWithBody(server, namespaceName, approvalRequestName, "application/json", bodyReader)
+}
+
+// NewDecideApprovalRequestRequestWithBody generates requests for DecideApprovalRequest with any type of body
+func NewDecideApprovalRequestRequestWithBody(server string, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "namespaceName", runtime.ParamLocationPath, namespaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "approvalRequestName", runtime.ParamLocationPath, approvalRequestName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/namespaces/%s/approvalrequests/%s/decision", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -15746,6 +16418,39 @@ type ClientWithResponsesInterface interface {
 
 	UpdateNamespaceWithResponse(ctx context.Context, namespaceName NamespaceNameParam, body UpdateNamespaceJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateNamespaceResp, error)
 
+	// ListApprovalPoliciesWithResponse request
+	ListApprovalPoliciesWithResponse(ctx context.Context, namespaceName NamespaceNameParam, params *ListApprovalPoliciesParams, reqEditors ...RequestEditorFn) (*ListApprovalPoliciesResp, error)
+
+	// CreateApprovalPolicyWithBodyWithResponse request with any body
+	CreateApprovalPolicyWithBodyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApprovalPolicyResp, error)
+
+	CreateApprovalPolicyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, body CreateApprovalPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateApprovalPolicyResp, error)
+
+	// DeleteApprovalPolicyWithResponse request
+	DeleteApprovalPolicyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, reqEditors ...RequestEditorFn) (*DeleteApprovalPolicyResp, error)
+
+	// GetApprovalPolicyWithResponse request
+	GetApprovalPolicyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, reqEditors ...RequestEditorFn) (*GetApprovalPolicyResp, error)
+
+	// UpdateApprovalPolicyWithBodyWithResponse request with any body
+	UpdateApprovalPolicyWithBodyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateApprovalPolicyResp, error)
+
+	UpdateApprovalPolicyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, body UpdateApprovalPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateApprovalPolicyResp, error)
+
+	// ListApprovalRequestsWithResponse request
+	ListApprovalRequestsWithResponse(ctx context.Context, namespaceName NamespaceNameParam, params *ListApprovalRequestsParams, reqEditors ...RequestEditorFn) (*ListApprovalRequestsResp, error)
+
+	// GetApprovalRequestWithResponse request
+	GetApprovalRequestWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, reqEditors ...RequestEditorFn) (*GetApprovalRequestResp, error)
+
+	// CancelApprovalRequestWithResponse request
+	CancelApprovalRequestWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, reqEditors ...RequestEditorFn) (*CancelApprovalRequestResp, error)
+
+	// DecideApprovalRequestWithBodyWithResponse request with any body
+	DecideApprovalRequestWithBodyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DecideApprovalRequestResp, error)
+
+	DecideApprovalRequestWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, body DecideApprovalRequestJSONRequestBody, reqEditors ...RequestEditorFn) (*DecideApprovalRequestResp, error)
+
 	// ListNamespaceRoleBindingsWithResponse request
 	ListNamespaceRoleBindingsWithResponse(ctx context.Context, namespaceName NamespaceNameParam, params *ListNamespaceRoleBindingsParams, reqEditors ...RequestEditorFn) (*ListNamespaceRoleBindingsResp, error)
 
@@ -18016,6 +18721,249 @@ func (r UpdateNamespaceResp) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r UpdateNamespaceResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ListApprovalPoliciesResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ApprovalPolicyList
+	JSON400      *BadRequest
+	JSON401      *Unauthorized
+	JSON403      *Forbidden
+	JSON404      *NotFound
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r ListApprovalPoliciesResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListApprovalPoliciesResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateApprovalPolicyResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *ApprovalPolicy
+	JSON400      *BadRequest
+	JSON401      *Unauthorized
+	JSON403      *Forbidden
+	JSON409      *Conflict
+	JSON422      *UnprocessableContent
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateApprovalPolicyResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateApprovalPolicyResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteApprovalPolicyResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON401      *Unauthorized
+	JSON403      *Forbidden
+	JSON404      *NotFound
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteApprovalPolicyResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteApprovalPolicyResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetApprovalPolicyResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ApprovalPolicy
+	JSON401      *Unauthorized
+	JSON403      *Forbidden
+	JSON404      *NotFound
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetApprovalPolicyResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetApprovalPolicyResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateApprovalPolicyResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ApprovalPolicy
+	JSON400      *BadRequest
+	JSON401      *Unauthorized
+	JSON403      *Forbidden
+	JSON404      *NotFound
+	JSON422      *UnprocessableContent
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateApprovalPolicyResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateApprovalPolicyResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ListApprovalRequestsResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ApprovalRequestList
+	JSON400      *BadRequest
+	JSON401      *Unauthorized
+	JSON403      *Forbidden
+	JSON404      *NotFound
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r ListApprovalRequestsResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListApprovalRequestsResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetApprovalRequestResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ApprovalRequest
+	JSON401      *Unauthorized
+	JSON403      *Forbidden
+	JSON404      *NotFound
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetApprovalRequestResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetApprovalRequestResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CancelApprovalRequestResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ApprovalRequest
+	JSON401      *Unauthorized
+	JSON403      *Forbidden
+	JSON404      *NotFound
+	JSON409      *Conflict
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r CancelApprovalRequestResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CancelApprovalRequestResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DecideApprovalRequestResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ApprovalRequest
+	JSON400      *BadRequest
+	JSON401      *Unauthorized
+	JSON403      *Forbidden
+	JSON404      *NotFound
+	JSON409      *Conflict
+	JSON422      *UnprocessableContent
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r DecideApprovalRequestResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DecideApprovalRequestResp) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -22740,6 +23688,111 @@ func (c *ClientWithResponses) UpdateNamespaceWithResponse(ctx context.Context, n
 		return nil, err
 	}
 	return ParseUpdateNamespaceResp(rsp)
+}
+
+// ListApprovalPoliciesWithResponse request returning *ListApprovalPoliciesResp
+func (c *ClientWithResponses) ListApprovalPoliciesWithResponse(ctx context.Context, namespaceName NamespaceNameParam, params *ListApprovalPoliciesParams, reqEditors ...RequestEditorFn) (*ListApprovalPoliciesResp, error) {
+	rsp, err := c.ListApprovalPolicies(ctx, namespaceName, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListApprovalPoliciesResp(rsp)
+}
+
+// CreateApprovalPolicyWithBodyWithResponse request with arbitrary body returning *CreateApprovalPolicyResp
+func (c *ClientWithResponses) CreateApprovalPolicyWithBodyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateApprovalPolicyResp, error) {
+	rsp, err := c.CreateApprovalPolicyWithBody(ctx, namespaceName, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateApprovalPolicyResp(rsp)
+}
+
+func (c *ClientWithResponses) CreateApprovalPolicyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, body CreateApprovalPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateApprovalPolicyResp, error) {
+	rsp, err := c.CreateApprovalPolicy(ctx, namespaceName, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateApprovalPolicyResp(rsp)
+}
+
+// DeleteApprovalPolicyWithResponse request returning *DeleteApprovalPolicyResp
+func (c *ClientWithResponses) DeleteApprovalPolicyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, reqEditors ...RequestEditorFn) (*DeleteApprovalPolicyResp, error) {
+	rsp, err := c.DeleteApprovalPolicy(ctx, namespaceName, approvalPolicyName, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteApprovalPolicyResp(rsp)
+}
+
+// GetApprovalPolicyWithResponse request returning *GetApprovalPolicyResp
+func (c *ClientWithResponses) GetApprovalPolicyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, reqEditors ...RequestEditorFn) (*GetApprovalPolicyResp, error) {
+	rsp, err := c.GetApprovalPolicy(ctx, namespaceName, approvalPolicyName, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetApprovalPolicyResp(rsp)
+}
+
+// UpdateApprovalPolicyWithBodyWithResponse request with arbitrary body returning *UpdateApprovalPolicyResp
+func (c *ClientWithResponses) UpdateApprovalPolicyWithBodyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateApprovalPolicyResp, error) {
+	rsp, err := c.UpdateApprovalPolicyWithBody(ctx, namespaceName, approvalPolicyName, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateApprovalPolicyResp(rsp)
+}
+
+func (c *ClientWithResponses) UpdateApprovalPolicyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalPolicyName ApprovalPolicyNameParam, body UpdateApprovalPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateApprovalPolicyResp, error) {
+	rsp, err := c.UpdateApprovalPolicy(ctx, namespaceName, approvalPolicyName, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateApprovalPolicyResp(rsp)
+}
+
+// ListApprovalRequestsWithResponse request returning *ListApprovalRequestsResp
+func (c *ClientWithResponses) ListApprovalRequestsWithResponse(ctx context.Context, namespaceName NamespaceNameParam, params *ListApprovalRequestsParams, reqEditors ...RequestEditorFn) (*ListApprovalRequestsResp, error) {
+	rsp, err := c.ListApprovalRequests(ctx, namespaceName, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListApprovalRequestsResp(rsp)
+}
+
+// GetApprovalRequestWithResponse request returning *GetApprovalRequestResp
+func (c *ClientWithResponses) GetApprovalRequestWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, reqEditors ...RequestEditorFn) (*GetApprovalRequestResp, error) {
+	rsp, err := c.GetApprovalRequest(ctx, namespaceName, approvalRequestName, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetApprovalRequestResp(rsp)
+}
+
+// CancelApprovalRequestWithResponse request returning *CancelApprovalRequestResp
+func (c *ClientWithResponses) CancelApprovalRequestWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, reqEditors ...RequestEditorFn) (*CancelApprovalRequestResp, error) {
+	rsp, err := c.CancelApprovalRequest(ctx, namespaceName, approvalRequestName, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCancelApprovalRequestResp(rsp)
+}
+
+// DecideApprovalRequestWithBodyWithResponse request with arbitrary body returning *DecideApprovalRequestResp
+func (c *ClientWithResponses) DecideApprovalRequestWithBodyWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DecideApprovalRequestResp, error) {
+	rsp, err := c.DecideApprovalRequestWithBody(ctx, namespaceName, approvalRequestName, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDecideApprovalRequestResp(rsp)
+}
+
+func (c *ClientWithResponses) DecideApprovalRequestWithResponse(ctx context.Context, namespaceName NamespaceNameParam, approvalRequestName ApprovalRequestNameParam, body DecideApprovalRequestJSONRequestBody, reqEditors ...RequestEditorFn) (*DecideApprovalRequestResp, error) {
+	rsp, err := c.DecideApprovalRequest(ctx, namespaceName, approvalRequestName, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDecideApprovalRequestResp(rsp)
 }
 
 // ListNamespaceRoleBindingsWithResponse request returning *ListNamespaceRoleBindingsResp
@@ -28221,6 +29274,555 @@ func ParseUpdateNamespaceResp(rsp *http.Response) (*UpdateNamespaceResp, error) 
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest UnprocessableContent
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListApprovalPoliciesResp parses an HTTP response from a ListApprovalPoliciesWithResponse call
+func ParseListApprovalPoliciesResp(rsp *http.Response) (*ListApprovalPoliciesResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListApprovalPoliciesResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ApprovalPolicyList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateApprovalPolicyResp parses an HTTP response from a CreateApprovalPolicyWithResponse call
+func ParseCreateApprovalPolicyResp(rsp *http.Response) (*CreateApprovalPolicyResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateApprovalPolicyResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest ApprovalPolicy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Conflict
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest UnprocessableContent
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteApprovalPolicyResp parses an HTTP response from a DeleteApprovalPolicyWithResponse call
+func ParseDeleteApprovalPolicyResp(rsp *http.Response) (*DeleteApprovalPolicyResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteApprovalPolicyResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetApprovalPolicyResp parses an HTTP response from a GetApprovalPolicyWithResponse call
+func ParseGetApprovalPolicyResp(rsp *http.Response) (*GetApprovalPolicyResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetApprovalPolicyResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ApprovalPolicy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateApprovalPolicyResp parses an HTTP response from a UpdateApprovalPolicyWithResponse call
+func ParseUpdateApprovalPolicyResp(rsp *http.Response) (*UpdateApprovalPolicyResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateApprovalPolicyResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ApprovalPolicy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest UnprocessableContent
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListApprovalRequestsResp parses an HTTP response from a ListApprovalRequestsWithResponse call
+func ParseListApprovalRequestsResp(rsp *http.Response) (*ListApprovalRequestsResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListApprovalRequestsResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ApprovalRequestList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetApprovalRequestResp parses an HTTP response from a GetApprovalRequestWithResponse call
+func ParseGetApprovalRequestResp(rsp *http.Response) (*GetApprovalRequestResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetApprovalRequestResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ApprovalRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCancelApprovalRequestResp parses an HTTP response from a CancelApprovalRequestWithResponse call
+func ParseCancelApprovalRequestResp(rsp *http.Response) (*CancelApprovalRequestResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CancelApprovalRequestResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ApprovalRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Conflict
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDecideApprovalRequestResp parses an HTTP response from a DecideApprovalRequestWithResponse call
+func ParseDecideApprovalRequestResp(rsp *http.Response) (*DecideApprovalRequestResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DecideApprovalRequestResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ApprovalRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Conflict
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
 		var dest UnprocessableContent

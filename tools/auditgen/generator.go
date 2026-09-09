@@ -45,9 +45,16 @@ var generateReleaseOverride = operationDef{
 // hierarchy — e.g. ".../releasebindings/{releaseBindingName}/trigger". They
 // are skipped when locating both the resource's own path parameter and its
 // resource-kind segment.
-var actionSuffixSegments = map[string]bool{
-	"trigger":          true,
-	"generate-release": true,
+//
+// The value is the audit verb the segment implies, which must match the leading
+// word of the operationId. An empty value means the verb comes from the HTTP
+// method as usual — "generate-release" is a POST whose operationId already
+// starts with "generate", handled by generateReleaseOverride.
+var actionSuffixSegments = map[string]string{
+	"trigger":          "trigger",
+	"generate-release": "",
+	"decision":         "decide",
+	"cancel":           "cancel",
 }
 
 // resourceCategories maps every resource kind (the plural REST path segment)
@@ -62,6 +69,13 @@ var resourceCategories = map[string]string{
 	"authzrolebindings":        "CategoryAuthorization",
 	"clusterauthzroles":        "CategoryAuthorization",
 	"clusterauthzrolebindings": "CategoryAuthorization",
+
+	// Approvals are an access-control gate, not resource management: an approval
+	// policy decides who may release a change, and a decision is the record of
+	// someone exercising that authority. Auditors ask for these alongside role
+	// changes, so they are grouped with them.
+	"approvalpolicies": "CategoryAuthorization",
+	"approvalrequests": "CategoryAuthorization",
 
 	"clustercomponenttypes":                   "CategoryManagement",
 	"clusterdataplanes":                       "CategoryManagement",
@@ -100,10 +114,12 @@ var resourceCategories = map[string]string{
 }
 
 // singularOverrides names resource-kind segments whose singular form isn't a
-// bare trailing-"s" strip. Empty today — every kind currently in the spec
-// singularizes mechanically — but kept as an explicit map rather than adding
-// general inflector logic to singularize for cases that don't exist yet.
-var singularOverrides = map[string]string{}
+// bare trailing-"s" strip. Kept as an explicit map rather than adding general
+// inflector logic, so each irregular kind is a deliberate entry.
+var singularOverrides = map[string]string{
+	// "approvalpolicies" would otherwise strip to "approvalpolicie".
+	"approvalpolicies": "approvalpolicy",
+}
 
 // operationDef mirrors audit.OperationDef's REST-relevant fields — auditgen
 // doesn't need MCP fields, which are added by hand in mcp_bindings.go.
@@ -204,9 +220,9 @@ func deriveDefinition(method, path, operationID string) (operationDef, error) {
 	}
 
 	verb := "create"
-	switch {
-	case lastRawSegment == "trigger":
-		verb = "trigger"
+	switch suffixVerb, isActionSuffix := actionSuffixSegments[lastRawSegment]; {
+	case isActionSuffix && suffixVerb != "":
+		verb = suffixVerb
 	case method == "PUT" || method == "PATCH":
 		verb = "update"
 	case method == "DELETE":
@@ -305,7 +321,7 @@ func pathTail(path string) (kindSegment, restResourceParam, lastRawSegment strin
 	i := len(segs) - 1
 	lastRawSegment = segs[i]
 
-	if actionSuffixSegments[segs[i]] {
+	if _, isActionSuffix := actionSuffixSegments[segs[i]]; isActionSuffix {
 		i--
 	}
 	if isPathParam(segs[i]) {

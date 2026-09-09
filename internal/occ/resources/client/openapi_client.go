@@ -2047,3 +2047,93 @@ func schemaResponseToRaw(schema *gen.SchemaResponse) (*json.RawMessage, error) {
 	raw := json.RawMessage(data)
 	return &raw, nil
 }
+
+// ListApprovalPolicies retrieves all approval policies for a namespace
+func (c *Client) ListApprovalPolicies(ctx context.Context, namespaceName string, params *gen.ListApprovalPoliciesParams) (*gen.ApprovalPolicyList, error) {
+	if params == nil {
+		params = &gen.ListApprovalPoliciesParams{}
+	}
+	resp, err := c.client.ListApprovalPoliciesWithResponse(ctx, namespaceName, params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list approval policies: %w", err)
+	}
+	if resp.JSON200 == nil {
+		return nil, apiError(resp.StatusCode(), resp.Body)
+	}
+	return resp.JSON200, nil
+}
+
+// GetApprovalPolicy retrieves a specific approval policy
+func (c *Client) GetApprovalPolicy(ctx context.Context, namespaceName, approvalPolicyName string) (*gen.ApprovalPolicy, error) {
+	resp, err := c.client.GetApprovalPolicyWithResponse(ctx, namespaceName, approvalPolicyName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get approval policy: %w", err)
+	}
+	if resp.JSON200 == nil {
+		return nil, apiError(resp.StatusCode(), resp.Body)
+	}
+	return resp.JSON200, nil
+}
+
+// DeleteApprovalPolicy deletes an approval policy
+func (c *Client) DeleteApprovalPolicy(ctx context.Context, namespaceName, approvalPolicyName string) error {
+	resp, err := c.client.DeleteApprovalPolicyWithResponse(ctx, namespaceName, approvalPolicyName)
+	if err != nil {
+		return fmt.Errorf("failed to delete approval policy: %w", err)
+	}
+	if resp.StatusCode() != http.StatusNoContent {
+		return apiError(resp.StatusCode(), resp.Body)
+	}
+	return nil
+}
+
+// ListApprovalRequests retrieves approval requests for a namespace
+func (c *Client) ListApprovalRequests(ctx context.Context, namespaceName string, params *gen.ListApprovalRequestsParams) (*gen.ApprovalRequestList, error) {
+	if params == nil {
+		params = &gen.ListApprovalRequestsParams{}
+	}
+	resp, err := c.client.ListApprovalRequestsWithResponse(ctx, namespaceName, params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list approval requests: %w", err)
+	}
+	if resp.JSON200 == nil {
+		return nil, apiError(resp.StatusCode(), resp.Body)
+	}
+	return resp.JSON200, nil
+}
+
+// GetApprovalRequest retrieves a specific approval request
+func (c *Client) GetApprovalRequest(ctx context.Context, namespaceName, approvalRequestName string) (*gen.ApprovalRequest, error) {
+	resp, err := c.client.GetApprovalRequestWithResponse(ctx, namespaceName, approvalRequestName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get approval request: %w", err)
+	}
+	if resp.JSON200 == nil {
+		return nil, apiError(resp.StatusCode(), resp.Body)
+	}
+	return resp.JSON200, nil
+}
+
+// DecideApprovalRequest records an approve or reject decision on a request
+func (c *Client) DecideApprovalRequest(ctx context.Context, namespaceName, approvalRequestName string, body gen.ApprovalDecisionRequest) (*gen.ApprovalRequest, error) {
+	resp, err := c.client.DecideApprovalRequestWithResponse(ctx, namespaceName, approvalRequestName, body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to record approval decision: %w", err)
+	}
+	if resp.JSON200 == nil {
+		return nil, apiError(resp.StatusCode(), resp.Body)
+	}
+	return resp.JSON200, nil
+}
+
+// CancelApprovalRequest withdraws a pending approval request
+func (c *Client) CancelApprovalRequest(ctx context.Context, namespaceName, approvalRequestName string) (*gen.ApprovalRequest, error) {
+	resp, err := c.client.CancelApprovalRequestWithResponse(ctx, namespaceName, approvalRequestName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to cancel approval request: %w", err)
+	}
+	if resp.JSON200 == nil {
+		return nil, apiError(resp.StatusCode(), resp.Body)
+	}
+	return resp.JSON200, nil
+}

@@ -12,6 +12,8 @@ import (
 	gatewayClient "github.com/openchoreo/openchoreo/internal/clients/gateway"
 	kubernetesClient "github.com/openchoreo/openchoreo/internal/clients/kubernetes"
 	"github.com/openchoreo/openchoreo/internal/openchoreo-api/config"
+	approvalpolicysvc "github.com/openchoreo/openchoreo/internal/openchoreo-api/services/approvalpolicy"
+	approvalrequestsvc "github.com/openchoreo/openchoreo/internal/openchoreo-api/services/approvalrequest"
 	authzsvc "github.com/openchoreo/openchoreo/internal/openchoreo-api/services/authz"
 	autobuildsvc "github.com/openchoreo/openchoreo/internal/openchoreo-api/services/autobuild"
 	clustercomponenttypesvc "github.com/openchoreo/openchoreo/internal/openchoreo-api/services/clustercomponenttype"
@@ -70,6 +72,8 @@ type Services struct {
 	ClusterWorkflowService                        clusterworkflowsvc.Service
 	DataPlaneService                              dataplanesvc.Service
 	DeploymentPipelineService                     deploymentpipelinesvc.Service
+	ApprovalPolicyService                         approvalpolicysvc.Service
+	ApprovalRequestService                        approvalrequestsvc.Service
 	NamespaceService                              namespacesvc.Service
 	ComponentService                              componentsvc.Service
 	ComponentReleaseService                       componentreleasesvc.Service
@@ -112,6 +116,8 @@ func NewServices(k8sClient client.Client, pap authzcore.PAP, pdp authzcore.PDP, 
 		ClusterWorkflowService:                        clusterworkflowsvc.NewServiceWithAuthz(k8sClient, pdp, logger.With("component", "clusterworkflow-service")),
 		DataPlaneService:                              dataplanesvc.NewServiceWithAuthz(k8sClient, pdp, logger.With("component", "dataplane-service")),
 		DeploymentPipelineService:                     deploymentpipelinesvc.NewServiceWithAuthz(k8sClient, pdp, logger.With("component", "deploymentpipeline-service")),
+		ApprovalPolicyService:                         approvalpolicysvc.NewServiceWithAuthz(k8sClient, pdp, logger.With("component", "approvalpolicy-service")),
+		ApprovalRequestService:                        approvalrequestsvc.NewServiceWithAuthz(k8sClient, pdp, logger.With("component", "approvalrequest-service")),
 		NamespaceService:                              namespacesvc.NewServiceWithAuthz(k8sClient, pdp, logger.With("component", "namespace-service")),
 		ComponentService:                              componentsvc.NewServiceWithAuthz(k8sClient, pdp, logger.With("component", "component-service")),
 		ComponentReleaseService:                       componentreleasesvc.NewServiceWithAuthz(k8sClient, pdp, logger.With("component", "componentrelease-service")),

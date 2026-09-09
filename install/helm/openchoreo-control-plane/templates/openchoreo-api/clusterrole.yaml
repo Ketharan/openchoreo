@@ -14,6 +14,8 @@ rules:
   - clusterauthzroles
   - authzrolebindings
   - authzroles
+  - approvalpolicies
+  - approvalrequests
   - apibindings
   - apiclasses
   - apis
@@ -86,6 +88,8 @@ rules:
 - apiGroups:
   - openchoreo.dev
   resources:
+  - approvalpolicies/status
+  - approvalrequests/status
   - apibindings/status
   - apiclasses/status
   - apis/status

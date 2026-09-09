@@ -80,6 +80,21 @@ const (
 	ActionUpdateReleaseBinding = "releasebinding:update"
 	ActionDeleteReleaseBinding = "releasebinding:delete"
 
+	// ApprovalPolicy actions
+	ActionCreateApprovalPolicy = "approvalpolicy:create"
+	ActionViewApprovalPolicy   = "approvalpolicy:view"
+	ActionUpdateApprovalPolicy = "approvalpolicy:update"
+	ActionDeleteApprovalPolicy = "approvalpolicy:delete"
+
+	// ApprovalRequest actions. Deciding is separate from updating: an approver
+	// decides, they do not edit, and the policy's approvers list is what actually
+	// authorises the decision. The action exists so the decision is audited and
+	// denied consistently with everything else.
+	ActionCreateApprovalRequest = "approvalrequest:create"
+	ActionViewApprovalRequest   = "approvalrequest:view"
+	ActionCancelApprovalRequest = "approvalrequest:cancel"
+	ActionDecideApprovalRequest = "approvalrequest:decide"
+
 	// ResourceReleaseBinding actions
 	ActionCreateResourceReleaseBinding = "resourcereleasebinding:create"
 	ActionViewResourceReleaseBinding   = "resourcereleasebinding:view"
@@ -291,6 +306,11 @@ type Action struct {
 	IsInternal bool
 	// Conditions holds the ABAC attributes available for CEL condition expressions on this action
 	Conditions []AttributeSpec
+	// Approvable indicates the action can be gated by an ApprovalPolicy, meaning it
+	// has an enforcement point that consults approval before the action takes effect.
+	// Gating an action without one would produce a policy that silently never fires,
+	// which is the failure the removed DeploymentPipeline approval flags had.
+	Approvable bool
 }
 
 // systemActions defines all available actions in the system
@@ -345,8 +365,22 @@ var systemActions = []Action{
 	// ReleaseBinding
 	{Name: ActionViewReleaseBinding, LowestScope: ScopeComponent, IsInternal: false},
 	{Name: ActionCreateReleaseBinding, LowestScope: ScopeComponent, IsInternal: false},
-	{Name: ActionUpdateReleaseBinding, LowestScope: ScopeComponent, IsInternal: false},
+	// Promotion is advancing the release pin on an existing binding, so
+	// releasebinding:update is the one gated action in this iteration.
+	{Name: ActionUpdateReleaseBinding, LowestScope: ScopeComponent, IsInternal: false, Approvable: true},
 	{Name: ActionDeleteReleaseBinding, LowestScope: ScopeComponent, IsInternal: false},
+
+	// ApprovalPolicy
+	{Name: ActionViewApprovalPolicy, LowestScope: ScopeNamespace, IsInternal: false},
+	{Name: ActionCreateApprovalPolicy, LowestScope: ScopeNamespace, IsInternal: false},
+	{Name: ActionUpdateApprovalPolicy, LowestScope: ScopeNamespace, IsInternal: false},
+	{Name: ActionDeleteApprovalPolicy, LowestScope: ScopeNamespace, IsInternal: false},
+
+	// ApprovalRequest
+	{Name: ActionViewApprovalRequest, LowestScope: ScopeProject, IsInternal: false},
+	{Name: ActionCreateApprovalRequest, LowestScope: ScopeProject, IsInternal: false},
+	{Name: ActionCancelApprovalRequest, LowestScope: ScopeProject, IsInternal: false},
+	{Name: ActionDecideApprovalRequest, LowestScope: ScopeProject, IsInternal: false},
 
 	// ResourceReleaseBinding
 	{Name: ActionViewResourceReleaseBinding, LowestScope: ScopeResource, IsInternal: false},
@@ -636,4 +670,29 @@ func ExpandActionPattern(pattern string) []string {
 		}
 	}
 	return nil
+}
+
+// IsApprovable reports whether an action can be gated by an ApprovalPolicy.
+// ApprovalPolicy validation uses this so a policy naming an ungatable action is
+// rejected when it is written, rather than appearing to work and never firing.
+func IsApprovable(action string) bool {
+	for i := range systemActions {
+		if systemActions[i].Name == action {
+			return systemActions[i].Approvable
+		}
+	}
+	return false
+}
+
+// ApprovableActions returns every action that can be gated, sorted, for error
+// messages and for the CLI to show what a policy may name.
+func ApprovableActions() []string {
+	var out []string
+	for i := range systemActions {
+		if systemActions[i].Approvable {
+			out = append(out, systemActions[i].Name)
+		}
+	}
+	sort.Strings(out)
+	return out
 }

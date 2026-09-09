@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openchoreo/openchoreo/internal/occ/cmd/apply"
+	"github.com/openchoreo/openchoreo/internal/occ/cmd/approval"
 	"github.com/openchoreo/openchoreo/internal/occ/cmd/authzrole"
 	"github.com/openchoreo/openchoreo/internal/occ/cmd/authzrolebinding"
 	"github.com/openchoreo/openchoreo/internal/occ/cmd/clusterauthzrole"
@@ -105,6 +106,7 @@ func BuildRootCmd() *cobra.Command {
 		secretreference.NewSecretReferenceCmd(f),
 		secret.NewSecretCmd(f),
 		workload.NewWorkloadCmd(f),
+		approval.NewApprovalCmd(f),
 		deploymentpipeline.NewDeploymentPipelineCmd(f),
 		observabilityalertsnotificationchannel.NewObservabilityAlertsNotificationChannelCmd(f),
 		remote.NewRemoteCmd(),

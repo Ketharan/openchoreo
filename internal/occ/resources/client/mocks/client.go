@@ -24,6 +24,66 @@ func (_m *MockInterface) EXPECT() *MockInterface_Expecter {
 	return &MockInterface_Expecter{mock: &_m.Mock}
 }
 
+// CancelApprovalRequest provides a mock function with given fields: ctx, namespaceName, approvalRequestName
+func (_m *MockInterface) CancelApprovalRequest(ctx context.Context, namespaceName string, approvalRequestName string) (*gen.ApprovalRequest, error) {
+	ret := _m.Called(ctx, namespaceName, approvalRequestName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CancelApprovalRequest")
+	}
+
+	var r0 *gen.ApprovalRequest
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*gen.ApprovalRequest, error)); ok {
+		return rf(ctx, namespaceName, approvalRequestName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *gen.ApprovalRequest); ok {
+		r0 = rf(ctx, namespaceName, approvalRequestName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.ApprovalRequest)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, namespaceName, approvalRequestName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockInterface_CancelApprovalRequest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CancelApprovalRequest'
+type MockInterface_CancelApprovalRequest_Call struct {
+	*mock.Call
+}
+
+// CancelApprovalRequest is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalRequestName string
+func (_e *MockInterface_Expecter) CancelApprovalRequest(ctx interface{}, namespaceName interface{}, approvalRequestName interface{}) *MockInterface_CancelApprovalRequest_Call {
+	return &MockInterface_CancelApprovalRequest_Call{Call: _e.mock.On("CancelApprovalRequest", ctx, namespaceName, approvalRequestName)}
+}
+
+func (_c *MockInterface_CancelApprovalRequest_Call) Run(run func(ctx context.Context, namespaceName string, approvalRequestName string)) *MockInterface_CancelApprovalRequest_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockInterface_CancelApprovalRequest_Call) Return(_a0 *gen.ApprovalRequest, _a1 error) *MockInterface_CancelApprovalRequest_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockInterface_CancelApprovalRequest_Call) RunAndReturn(run func(context.Context, string, string) (*gen.ApprovalRequest, error)) *MockInterface_CancelApprovalRequest_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateClusterProjectType provides a mock function with given fields: ctx, cpt
 func (_m *MockInterface) CreateClusterProjectType(ctx context.Context, cpt gen.ClusterProjectType) (*gen.ClusterProjectType, error) {
 	ret := _m.Called(ctx, cpt)
@@ -918,6 +978,115 @@ func (_c *MockInterface_CreateWorkflowRun_Call) Return(_a0 *gen.WorkflowRun, _a1
 }
 
 func (_c *MockInterface_CreateWorkflowRun_Call) RunAndReturn(run func(context.Context, string, gen.WorkflowRun) (*gen.WorkflowRun, error)) *MockInterface_CreateWorkflowRun_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DecideApprovalRequest provides a mock function with given fields: ctx, namespaceName, approvalRequestName, body
+func (_m *MockInterface) DecideApprovalRequest(ctx context.Context, namespaceName string, approvalRequestName string, body gen.ApprovalDecisionRequest) (*gen.ApprovalRequest, error) {
+	ret := _m.Called(ctx, namespaceName, approvalRequestName, body)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DecideApprovalRequest")
+	}
+
+	var r0 *gen.ApprovalRequest
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, gen.ApprovalDecisionRequest) (*gen.ApprovalRequest, error)); ok {
+		return rf(ctx, namespaceName, approvalRequestName, body)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, gen.ApprovalDecisionRequest) *gen.ApprovalRequest); ok {
+		r0 = rf(ctx, namespaceName, approvalRequestName, body)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.ApprovalRequest)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, gen.ApprovalDecisionRequest) error); ok {
+		r1 = rf(ctx, namespaceName, approvalRequestName, body)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockInterface_DecideApprovalRequest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DecideApprovalRequest'
+type MockInterface_DecideApprovalRequest_Call struct {
+	*mock.Call
+}
+
+// DecideApprovalRequest is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalRequestName string
+//   - body gen.ApprovalDecisionRequest
+func (_e *MockInterface_Expecter) DecideApprovalRequest(ctx interface{}, namespaceName interface{}, approvalRequestName interface{}, body interface{}) *MockInterface_DecideApprovalRequest_Call {
+	return &MockInterface_DecideApprovalRequest_Call{Call: _e.mock.On("DecideApprovalRequest", ctx, namespaceName, approvalRequestName, body)}
+}
+
+func (_c *MockInterface_DecideApprovalRequest_Call) Run(run func(ctx context.Context, namespaceName string, approvalRequestName string, body gen.ApprovalDecisionRequest)) *MockInterface_DecideApprovalRequest_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(gen.ApprovalDecisionRequest))
+	})
+	return _c
+}
+
+func (_c *MockInterface_DecideApprovalRequest_Call) Return(_a0 *gen.ApprovalRequest, _a1 error) *MockInterface_DecideApprovalRequest_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockInterface_DecideApprovalRequest_Call) RunAndReturn(run func(context.Context, string, string, gen.ApprovalDecisionRequest) (*gen.ApprovalRequest, error)) *MockInterface_DecideApprovalRequest_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteApprovalPolicy provides a mock function with given fields: ctx, namespaceName, approvalPolicyName
+func (_m *MockInterface) DeleteApprovalPolicy(ctx context.Context, namespaceName string, approvalPolicyName string) error {
+	ret := _m.Called(ctx, namespaceName, approvalPolicyName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteApprovalPolicy")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, namespaceName, approvalPolicyName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockInterface_DeleteApprovalPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteApprovalPolicy'
+type MockInterface_DeleteApprovalPolicy_Call struct {
+	*mock.Call
+}
+
+// DeleteApprovalPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalPolicyName string
+func (_e *MockInterface_Expecter) DeleteApprovalPolicy(ctx interface{}, namespaceName interface{}, approvalPolicyName interface{}) *MockInterface_DeleteApprovalPolicy_Call {
+	return &MockInterface_DeleteApprovalPolicy_Call{Call: _e.mock.On("DeleteApprovalPolicy", ctx, namespaceName, approvalPolicyName)}
+}
+
+func (_c *MockInterface_DeleteApprovalPolicy_Call) Run(run func(ctx context.Context, namespaceName string, approvalPolicyName string)) *MockInterface_DeleteApprovalPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockInterface_DeleteApprovalPolicy_Call) Return(_a0 error) *MockInterface_DeleteApprovalPolicy_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockInterface_DeleteApprovalPolicy_Call) RunAndReturn(run func(context.Context, string, string) error) *MockInterface_DeleteApprovalPolicy_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2696,6 +2865,126 @@ func (_c *MockInterface_GenerateRelease_Call) Return(_a0 *gen.ComponentRelease, 
 }
 
 func (_c *MockInterface_GenerateRelease_Call) RunAndReturn(run func(context.Context, string, string, gen.GenerateReleaseRequest) (*gen.ComponentRelease, error)) *MockInterface_GenerateRelease_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetApprovalPolicy provides a mock function with given fields: ctx, namespaceName, approvalPolicyName
+func (_m *MockInterface) GetApprovalPolicy(ctx context.Context, namespaceName string, approvalPolicyName string) (*gen.ApprovalPolicy, error) {
+	ret := _m.Called(ctx, namespaceName, approvalPolicyName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetApprovalPolicy")
+	}
+
+	var r0 *gen.ApprovalPolicy
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*gen.ApprovalPolicy, error)); ok {
+		return rf(ctx, namespaceName, approvalPolicyName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *gen.ApprovalPolicy); ok {
+		r0 = rf(ctx, namespaceName, approvalPolicyName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.ApprovalPolicy)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, namespaceName, approvalPolicyName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockInterface_GetApprovalPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetApprovalPolicy'
+type MockInterface_GetApprovalPolicy_Call struct {
+	*mock.Call
+}
+
+// GetApprovalPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalPolicyName string
+func (_e *MockInterface_Expecter) GetApprovalPolicy(ctx interface{}, namespaceName interface{}, approvalPolicyName interface{}) *MockInterface_GetApprovalPolicy_Call {
+	return &MockInterface_GetApprovalPolicy_Call{Call: _e.mock.On("GetApprovalPolicy", ctx, namespaceName, approvalPolicyName)}
+}
+
+func (_c *MockInterface_GetApprovalPolicy_Call) Run(run func(ctx context.Context, namespaceName string, approvalPolicyName string)) *MockInterface_GetApprovalPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockInterface_GetApprovalPolicy_Call) Return(_a0 *gen.ApprovalPolicy, _a1 error) *MockInterface_GetApprovalPolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockInterface_GetApprovalPolicy_Call) RunAndReturn(run func(context.Context, string, string) (*gen.ApprovalPolicy, error)) *MockInterface_GetApprovalPolicy_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetApprovalRequest provides a mock function with given fields: ctx, namespaceName, approvalRequestName
+func (_m *MockInterface) GetApprovalRequest(ctx context.Context, namespaceName string, approvalRequestName string) (*gen.ApprovalRequest, error) {
+	ret := _m.Called(ctx, namespaceName, approvalRequestName)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetApprovalRequest")
+	}
+
+	var r0 *gen.ApprovalRequest
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*gen.ApprovalRequest, error)); ok {
+		return rf(ctx, namespaceName, approvalRequestName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *gen.ApprovalRequest); ok {
+		r0 = rf(ctx, namespaceName, approvalRequestName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.ApprovalRequest)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, namespaceName, approvalRequestName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockInterface_GetApprovalRequest_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetApprovalRequest'
+type MockInterface_GetApprovalRequest_Call struct {
+	*mock.Call
+}
+
+// GetApprovalRequest is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalRequestName string
+func (_e *MockInterface_Expecter) GetApprovalRequest(ctx interface{}, namespaceName interface{}, approvalRequestName interface{}) *MockInterface_GetApprovalRequest_Call {
+	return &MockInterface_GetApprovalRequest_Call{Call: _e.mock.On("GetApprovalRequest", ctx, namespaceName, approvalRequestName)}
+}
+
+func (_c *MockInterface_GetApprovalRequest_Call) Run(run func(ctx context.Context, namespaceName string, approvalRequestName string)) *MockInterface_GetApprovalRequest_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockInterface_GetApprovalRequest_Call) Return(_a0 *gen.ApprovalRequest, _a1 error) *MockInterface_GetApprovalRequest_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockInterface_GetApprovalRequest_Call) RunAndReturn(run func(context.Context, string, string) (*gen.ApprovalRequest, error)) *MockInterface_GetApprovalRequest_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5681,6 +5970,126 @@ func (_c *MockInterface_GetWorkload_Call) Return(_a0 *gen.Workload, _a1 error) *
 }
 
 func (_c *MockInterface_GetWorkload_Call) RunAndReturn(run func(context.Context, string, string) (*gen.Workload, error)) *MockInterface_GetWorkload_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListApprovalPolicies provides a mock function with given fields: ctx, namespaceName, params
+func (_m *MockInterface) ListApprovalPolicies(ctx context.Context, namespaceName string, params *gen.ListApprovalPoliciesParams) (*gen.ApprovalPolicyList, error) {
+	ret := _m.Called(ctx, namespaceName, params)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListApprovalPolicies")
+	}
+
+	var r0 *gen.ApprovalPolicyList
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *gen.ListApprovalPoliciesParams) (*gen.ApprovalPolicyList, error)); ok {
+		return rf(ctx, namespaceName, params)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *gen.ListApprovalPoliciesParams) *gen.ApprovalPolicyList); ok {
+		r0 = rf(ctx, namespaceName, params)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.ApprovalPolicyList)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *gen.ListApprovalPoliciesParams) error); ok {
+		r1 = rf(ctx, namespaceName, params)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockInterface_ListApprovalPolicies_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListApprovalPolicies'
+type MockInterface_ListApprovalPolicies_Call struct {
+	*mock.Call
+}
+
+// ListApprovalPolicies is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - params *gen.ListApprovalPoliciesParams
+func (_e *MockInterface_Expecter) ListApprovalPolicies(ctx interface{}, namespaceName interface{}, params interface{}) *MockInterface_ListApprovalPolicies_Call {
+	return &MockInterface_ListApprovalPolicies_Call{Call: _e.mock.On("ListApprovalPolicies", ctx, namespaceName, params)}
+}
+
+func (_c *MockInterface_ListApprovalPolicies_Call) Run(run func(ctx context.Context, namespaceName string, params *gen.ListApprovalPoliciesParams)) *MockInterface_ListApprovalPolicies_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*gen.ListApprovalPoliciesParams))
+	})
+	return _c
+}
+
+func (_c *MockInterface_ListApprovalPolicies_Call) Return(_a0 *gen.ApprovalPolicyList, _a1 error) *MockInterface_ListApprovalPolicies_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockInterface_ListApprovalPolicies_Call) RunAndReturn(run func(context.Context, string, *gen.ListApprovalPoliciesParams) (*gen.ApprovalPolicyList, error)) *MockInterface_ListApprovalPolicies_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListApprovalRequests provides a mock function with given fields: ctx, namespaceName, params
+func (_m *MockInterface) ListApprovalRequests(ctx context.Context, namespaceName string, params *gen.ListApprovalRequestsParams) (*gen.ApprovalRequestList, error) {
+	ret := _m.Called(ctx, namespaceName, params)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListApprovalRequests")
+	}
+
+	var r0 *gen.ApprovalRequestList
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *gen.ListApprovalRequestsParams) (*gen.ApprovalRequestList, error)); ok {
+		return rf(ctx, namespaceName, params)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *gen.ListApprovalRequestsParams) *gen.ApprovalRequestList); ok {
+		r0 = rf(ctx, namespaceName, params)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.ApprovalRequestList)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *gen.ListApprovalRequestsParams) error); ok {
+		r1 = rf(ctx, namespaceName, params)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockInterface_ListApprovalRequests_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListApprovalRequests'
+type MockInterface_ListApprovalRequests_Call struct {
+	*mock.Call
+}
+
+// ListApprovalRequests is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - params *gen.ListApprovalRequestsParams
+func (_e *MockInterface_Expecter) ListApprovalRequests(ctx interface{}, namespaceName interface{}, params interface{}) *MockInterface_ListApprovalRequests_Call {
+	return &MockInterface_ListApprovalRequests_Call{Call: _e.mock.On("ListApprovalRequests", ctx, namespaceName, params)}
+}
+
+func (_c *MockInterface_ListApprovalRequests_Call) Run(run func(ctx context.Context, namespaceName string, params *gen.ListApprovalRequestsParams)) *MockInterface_ListApprovalRequests_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*gen.ListApprovalRequestsParams))
+	})
+	return _c
+}
+
+func (_c *MockInterface_ListApprovalRequests_Call) Return(_a0 *gen.ApprovalRequestList, _a1 error) *MockInterface_ListApprovalRequests_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockInterface_ListApprovalRequests_Call) RunAndReturn(run func(context.Context, string, *gen.ListApprovalRequestsParams) (*gen.ApprovalRequestList, error)) *MockInterface_ListApprovalRequests_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -93,6 +93,10 @@ tags:
     description: Resource release binding management
   - name: ProjectReleaseBindings
     description: Project release binding management
+  - name: ApprovalPolicies
+    description: Approval policy management (which actions require a human decision)
+  - name: ApprovalRequests
+    description: Approval request management (pending and decided approvals)
 
 paths:
   # =============================================================================
@@ -6304,6 +6308,281 @@ paths:
         '501':
           $ref: '#/components/responses/NotImplemented'
 
+  # =============================================================================
+  # Approval Policies
+  # =============================================================================
+  /api/v1/namespaces/{namespaceName}/approvalpolicies:
+    get:
+      operationId: listApprovalPolicies
+      summary: List approval policies
+      description: Returns a paginated list of approval policies within a namespace.
+      tags: [ApprovalPolicies]
+      parameters:
+        - $ref: '#/components/parameters/NamespaceNameParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+      responses:
+        '200':
+          description: List of approval policies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalPolicyList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      operationId: createApprovalPolicy
+      summary: Create approval policy
+      description: |
+        Creates an approval policy. The action named by the policy must be one that has an
+        enforcement point; naming any other action is rejected, because a policy that cannot
+        be enforced would appear to work while never firing.
+      tags: [ApprovalPolicies]
+      parameters:
+        - $ref: '#/components/parameters/NamespaceNameParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalPolicy'
+      responses:
+        '201':
+          description: Approval policy created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalPolicy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/namespaces/{namespaceName}/approvalpolicies/{approvalPolicyName}:
+    get:
+      operationId: getApprovalPolicy
+      summary: Get approval policy
+      description: Returns details of a specific approval policy.
+      tags: [ApprovalPolicies]
+      parameters:
+        - $ref: '#/components/parameters/NamespaceNameParam'
+        - $ref: '#/components/parameters/ApprovalPolicyNameParam'
+      responses:
+        '200':
+          description: Approval policy details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalPolicy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      operationId: updateApprovalPolicy
+      summary: Update approval policy
+      description: Replaces an existing approval policy (full update).
+      tags: [ApprovalPolicies]
+      parameters:
+        - $ref: '#/components/parameters/NamespaceNameParam'
+        - $ref: '#/components/parameters/ApprovalPolicyNameParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalPolicy'
+      responses:
+        '200':
+          description: Approval policy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalPolicy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      operationId: deleteApprovalPolicy
+      summary: Delete approval policy
+      description: Deletes an approval policy by name. Pending requests are unaffected.
+      tags: [ApprovalPolicies]
+      parameters:
+        - $ref: '#/components/parameters/NamespaceNameParam'
+        - $ref: '#/components/parameters/ApprovalPolicyNameParam'
+      responses:
+        '204':
+          description: Approval policy deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # =============================================================================
+  # Approval Requests
+  # =============================================================================
+  /api/v1/namespaces/{namespaceName}/approvalrequests:
+    get:
+      operationId: listApprovalRequests
+      summary: List approval requests
+      description: |
+        Returns a paginated list of approval requests within a namespace, optionally filtered
+        by phase or by the environment the request targets.
+      tags: [ApprovalRequests]
+      parameters:
+        - $ref: '#/components/parameters/NamespaceNameParam'
+        - $ref: '#/components/parameters/ApprovalPhaseQueryParam'
+        - $ref: '#/components/parameters/ApprovalEnvironmentQueryParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+      responses:
+        '200':
+          description: List of approval requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalRequestList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/namespaces/{namespaceName}/approvalrequests/{approvalRequestName}:
+    get:
+      operationId: getApprovalRequest
+      summary: Get approval request
+      description: Returns details of a specific approval request, including the summary shown to approvers.
+      tags: [ApprovalRequests]
+      parameters:
+        - $ref: '#/components/parameters/NamespaceNameParam'
+        - $ref: '#/components/parameters/ApprovalRequestNameParam'
+      responses:
+        '200':
+          description: Approval request details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/namespaces/{namespaceName}/approvalrequests/{approvalRequestName}/decision:
+    post:
+      operationId: decideApprovalRequest
+      summary: Approve or reject an approval request
+      description: |
+        Records a decision on a pending approval request. Only a subject the policy names as an
+        approver may decide, and a rejection must carry a comment. A request that is not pending
+        is rejected with 409.
+      tags: [ApprovalRequests]
+      parameters:
+        - $ref: '#/components/parameters/NamespaceNameParam'
+        - $ref: '#/components/parameters/ApprovalRequestNameParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecisionRequest'
+      responses:
+        '200':
+          description: Decision recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/namespaces/{namespaceName}/approvalrequests/{approvalRequestName}/cancel:
+    post:
+      operationId: cancelApprovalRequest
+      summary: Cancel an approval request
+      description: |
+        Withdraws a pending request. Intended for the requester, so that a change nobody should
+        review any longer stops occupying an approver's queue.
+      tags: [ApprovalRequests]
+      parameters:
+        - $ref: '#/components/parameters/NamespaceNameParam'
+        - $ref: '#/components/parameters/ApprovalRequestNameParam'
+      responses:
+        '200':
+          description: Request cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
 components:
   # ===========================================================================
   # Security Schemes
@@ -6540,6 +6819,43 @@ components:
       schema:
         type: string
         example: api-service-run-1234
+
+    ApprovalPolicyNameParam:
+      name: approvalPolicyName
+      in: path
+      required: true
+      description: Approval policy name
+      schema:
+        type: string
+        example: production-changes
+
+    ApprovalRequestNameParam:
+      name: approvalRequestName
+      in: path
+      required: true
+      description: Approval request name
+      schema:
+        type: string
+        example: apr-7f3c9a
+
+    ApprovalPhaseQueryParam:
+      name: phase
+      in: query
+      required: false
+      description: Filter requests by lifecycle phase
+      schema:
+        type: string
+        enum: [Pending, Approved, Rejected, Cancelled, Executed, Failed]
+        example: Pending
+
+    ApprovalEnvironmentQueryParam:
+      name: environment
+      in: query
+      required: false
+      description: Filter requests by the environment they target
+      schema:
+        type: string
+        example: production
 
     ReleaseBindingNameParam:
       name: releaseBindingName
@@ -9802,6 +10118,331 @@ components:
     # -------------------------------------------------------------------------
     # Release Bindings
     # -------------------------------------------------------------------------
+    ApprovalPolicyList:
+      type: object
+      description: Paginated list of approval policies
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalPolicy'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ApprovalPolicy:
+      type: object
+      description: |
+        ApprovalPolicy resource.
+        Declares that an action, within a scope, requires a human decision.
+      required: [metadata]
+      properties:
+        apiVersion:
+          type: string
+          readOnly: true
+          description: API version of the resource
+          example: openchoreo.dev/v1alpha1
+        kind:
+          type: string
+          readOnly: true
+          description: Kind of the resource
+          example: ApprovalPolicy
+        metadata:
+          $ref: '#/components/schemas/ObjectMeta'
+        spec:
+          $ref: '#/components/schemas/ApprovalPolicySpec'
+        status:
+          readOnly: true
+          allOf:
+            - $ref: '#/components/schemas/ApprovalPolicyStatus'
+
+    ApprovalPolicySpec:
+      type: object
+      description: Desired state of an ApprovalPolicy
+      required: [action, approvers]
+      properties:
+        action:
+          type: string
+          description: |
+            The action this policy gates. Must be an action with an enforcement point.
+          example: releasebinding:update
+        scope:
+          $ref: '#/components/schemas/ApprovalScope'
+        changes:
+          type: array
+          description: |
+            Kinds of change that are gated. Omitted gates every kind, so narrowing is
+            deliberate: a policy listing only ReleaseChange leaves undeploy and config-only
+            edits ungated.
+          items:
+            type: string
+            enum: [ReleaseChange, ConfigChange, Undeploy]
+          example: [ReleaseChange, ConfigChange, Undeploy]
+        approvers:
+          type: array
+          minItems: 1
+          description: Who may decide. Any one of them is sufficient.
+          items:
+            $ref: '#/components/schemas/ApproverRef'
+        allowSelfApproval:
+          type: boolean
+          default: false
+          description: Whether the requester may approve their own request
+        suspend:
+          type: boolean
+          default: false
+          description: Stops the policy gating anything without deleting it
+        requestTTLAfterCompletion:
+          type: string
+          default: 30d
+          description: How long decided requests are retained. Pending requests are never auto-deleted.
+          example: 90d
+
+    ApprovalScope:
+      type: object
+      description: Narrows a policy to part of the ownership hierarchy. An empty field matches anything.
+      properties:
+        project:
+          type: string
+          example: checkout
+        component:
+          type: string
+          example: checkout-svc
+        environment:
+          type: string
+          example: production
+        fromEnvironment:
+          type: string
+          description: Narrows to promotions originating in this environment
+          example: dev
+
+    ApproverRef:
+      type: object
+      description: |
+        Who may decide. Exactly one of roleRef or entitlement must be set. A claim-matched
+        subject cannot be enumerated, so a named individual is the only form that lets a
+        requester see who to ask.
+      properties:
+        roleRef:
+          type: object
+          required: [kind, name]
+          properties:
+            kind:
+              type: string
+              enum: [AuthzRole, ClusterAuthzRole]
+            name:
+              type: string
+              example: release-manager
+        scope:
+          type: object
+          description: Bounds where a role-based approver's authority applies
+          properties:
+            project:
+              type: string
+            component:
+              type: string
+            resource:
+              type: string
+        entitlement:
+          type: object
+          required: [claim, value]
+          properties:
+            claim:
+              type: string
+              example: groups
+            value:
+              type: string
+              example: release-managers
+
+    ApprovalPolicyStatus:
+      type: object
+      description: Observed state of an ApprovalPolicy
+      properties:
+        observedGeneration:
+          type: integer
+          format: int64
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+
+    ApprovalRequestList:
+      type: object
+      description: Paginated list of approval requests
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalRequest'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ApprovalRequest:
+      type: object
+      description: |
+        ApprovalRequest resource.
+        One pending human decision about one specific change.
+      required: [metadata]
+      properties:
+        apiVersion:
+          type: string
+          readOnly: true
+          example: openchoreo.dev/v1alpha1
+        kind:
+          type: string
+          readOnly: true
+          example: ApprovalRequest
+        metadata:
+          $ref: '#/components/schemas/ObjectMeta'
+        spec:
+          $ref: '#/components/schemas/ApprovalRequestSpec'
+        status:
+          readOnly: true
+          allOf:
+            - $ref: '#/components/schemas/ApprovalRequestStatus'
+
+    ApprovalRequestSpec:
+      type: object
+      description: Desired state of an ApprovalRequest. Immutable except for the decision.
+      required: [policyName, action, target, stateFingerprint, requester]
+      properties:
+        policyName:
+          type: string
+          description: The policy that gated the action
+          example: production-changes
+        action:
+          type: string
+          example: releasebinding:update
+        target:
+          $ref: '#/components/schemas/ApprovalTarget'
+        requestedState:
+          type: object
+          additionalProperties: true
+          description: |
+            The complete intent being approved, not just the release name: binding an approval
+            to the release name alone would let configuration change between review and execution.
+        stateFingerprint:
+          type: string
+          description: |
+            Digest of requestedState. The action may only proceed when the state being applied
+            hashes to this value, which is what stops an approval being replayed.
+          example: sha256:9f2b...
+        summary:
+          $ref: '#/components/schemas/ApprovalSummary'
+        requester:
+          $ref: '#/components/schemas/ApprovalSubject'
+        message:
+          type: string
+          description: The requester's justification
+          maxLength: 2048
+        decision:
+          $ref: '#/components/schemas/ApprovalDecision'
+        ttlAfterCompletion:
+          type: string
+          example: 30d
+
+    ApprovalTarget:
+      type: object
+      description: The object an action would act upon
+      required: [kind, name]
+      properties:
+        kind:
+          type: string
+          example: ReleaseBinding
+        name:
+          type: string
+          example: checkout-svc-production
+        project:
+          type: string
+        component:
+          type: string
+        environment:
+          type: string
+          example: production
+
+    ApprovalSummary:
+      type: object
+      description: |
+        Evidence shown to an approver. Held on the request so an approver can decide without
+        read access to the requester's project, and so the record preserves what they saw.
+      properties:
+        changeKind:
+          type: string
+          enum: [ReleaseChange, ConfigChange, Undeploy]
+        current:
+          type: string
+          example: checkout-svc-v1.4.1
+        requested:
+          type: string
+          example: checkout-svc-v1.4.2
+        details:
+          type: array
+          items:
+            type: string
+
+    ApprovalSubject:
+      type: object
+      description: A person as resolved from their token. Not a reference to a stored user record.
+      required: [id]
+      properties:
+        id:
+          type: string
+          description: Stable subject identifier from the token
+        displayName:
+          type: string
+
+    ApprovalDecision:
+      type: object
+      description: An approver's recorded answer
+      required: [result, decidedBy, decidedAt]
+      properties:
+        result:
+          type: string
+          enum: [Approved, Rejected]
+        decidedBy:
+          $ref: '#/components/schemas/ApprovalSubject'
+        decidedAt:
+          type: string
+          format: date-time
+        comment:
+          type: string
+          maxLength: 2048
+
+    ApprovalDecisionRequest:
+      type: object
+      description: A decision submitted by an approver
+      required: [result]
+      properties:
+        result:
+          type: string
+          enum: [Approved, Rejected]
+        comment:
+          type: string
+          maxLength: 2048
+          description: Explains the decision. Required when rejecting.
+
+    ApprovalRequestStatus:
+      type: object
+      description: Observed state of an ApprovalRequest
+      properties:
+        phase:
+          type: string
+          enum: [Pending, Approved, Rejected, Cancelled, Executed, Failed]
+        observedGeneration:
+          type: integer
+          format: int64
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        completedAt:
+          type: string
+          format: date-time
+        staleReason:
+          type: string
+          description: Set when a pending request can no longer be fulfilled as written
+
     ReleaseBindingList:
       type: object
       description: Paginated list of release bindings

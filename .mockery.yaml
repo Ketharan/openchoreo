@@ -18,6 +18,12 @@ packages:
     interfaces:
       PDP:
       PAP:
+  github.com/openchoreo/openchoreo/internal/openchoreo-api/services/approvalpolicy:
+    interfaces:
+      Service:
+  github.com/openchoreo/openchoreo/internal/openchoreo-api/services/approvalrequest:
+    interfaces:
+      Service:
   github.com/openchoreo/openchoreo/internal/openchoreo-api/services/clustercomponenttype:
     interfaces:
       Service:

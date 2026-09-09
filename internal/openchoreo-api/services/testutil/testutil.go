@@ -45,6 +45,8 @@ func NewFakeClient(objects ...client.Object) client.Client {
 func statusSubresourceObjects() []client.Object {
 	return []client.Object{
 		&corev1.Namespace{},
+		&openchoreov1alpha1.ApprovalPolicy{},
+		&openchoreov1alpha1.ApprovalRequest{},
 		&openchoreov1alpha1.WorkflowPlane{},
 		&openchoreov1alpha1.ClusterWorkflowPlane{},
 		&openchoreov1alpha1.ClusterComponentType{},

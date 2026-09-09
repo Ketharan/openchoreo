@@ -162,6 +162,15 @@ type Interface interface {
 	UpdateResourceReleaseBinding(ctx context.Context, namespaceName, bindingName string, rrb gen.ResourceReleaseBinding) (*gen.ResourceReleaseBinding, error)
 	DeleteResourceReleaseBinding(ctx context.Context, namespaceName, bindingName string) error
 
+	// Approvals
+	ListApprovalPolicies(ctx context.Context, namespaceName string, params *gen.ListApprovalPoliciesParams) (*gen.ApprovalPolicyList, error)
+	GetApprovalPolicy(ctx context.Context, namespaceName, approvalPolicyName string) (*gen.ApprovalPolicy, error)
+	DeleteApprovalPolicy(ctx context.Context, namespaceName, approvalPolicyName string) error
+	ListApprovalRequests(ctx context.Context, namespaceName string, params *gen.ListApprovalRequestsParams) (*gen.ApprovalRequestList, error)
+	GetApprovalRequest(ctx context.Context, namespaceName, approvalRequestName string) (*gen.ApprovalRequest, error)
+	DecideApprovalRequest(ctx context.Context, namespaceName, approvalRequestName string, body gen.ApprovalDecisionRequest) (*gen.ApprovalRequest, error)
+	CancelApprovalRequest(ctx context.Context, namespaceName, approvalRequestName string) (*gen.ApprovalRequest, error)
+
 	ListDeploymentPipelines(ctx context.Context, namespaceName string, params *gen.ListDeploymentPipelinesParams) (*gen.DeploymentPipelineList, error)
 	GetDeploymentPipeline(ctx context.Context, namespaceName, deploymentPipelineName string) (*gen.DeploymentPipeline, error)
 	DeleteDeploymentPipeline(ctx context.Context, namespaceName, deploymentPipelineName string) error

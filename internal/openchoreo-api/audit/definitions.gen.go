@@ -19,6 +19,14 @@ import (
 func generatedOperationDefs() []audit.OperationDef {
 	return []audit.OperationDef{
 		{
+			ID: "CancelApprovalRequest", Action: "cancel_approval_request", ResourceType: "approvalrequest",
+			Category: audit.CategoryAuthorization, RESTResourceParam: "approvalRequestName",
+		},
+		{
+			ID: "CreateApprovalPolicy", Action: "create_approval_policy", ResourceType: "approvalpolicy",
+			Category: audit.CategoryAuthorization,
+		},
+		{
 			ID: "CreateClusterComponentType", Action: "create_cluster_component_type", ResourceType: "clustercomponenttype",
 			Category: audit.CategoryManagement,
 		},
@@ -169,6 +177,14 @@ func generatedOperationDefs() []audit.OperationDef {
 		{
 			ID: "CreateWorkload", Action: "create_workload", ResourceType: "workload",
 			Category: audit.CategoryManagement,
+		},
+		{
+			ID: "DecideApprovalRequest", Action: "decide_approval_request", ResourceType: "approvalrequest",
+			Category: audit.CategoryAuthorization, RESTResourceParam: "approvalRequestName",
+		},
+		{
+			ID: "DeleteApprovalPolicy", Action: "delete_approval_policy", ResourceType: "approvalpolicy",
+			Category: audit.CategoryAuthorization, RESTResourceParam: "approvalPolicyName",
 		},
 		{
 			ID: "DeleteClusterComponentType", Action: "delete_cluster_component_type", ResourceType: "clustercomponenttype",
@@ -329,6 +345,10 @@ func generatedOperationDefs() []audit.OperationDef {
 		{
 			ID: "TriggerReleaseBindingCronJob", Action: "trigger_release_binding_cron_job", ResourceType: "releasebinding",
 			Category: audit.CategoryManagement, RESTResourceParam: "releaseBindingName",
+		},
+		{
+			ID: "UpdateApprovalPolicy", Action: "update_approval_policy", ResourceType: "approvalpolicy",
+			Category: audit.CategoryAuthorization, RESTResourceParam: "approvalPolicyName",
 		},
 		{
 			ID: "UpdateClusterComponentType", Action: "update_cluster_component_type", ResourceType: "clustercomponenttype",

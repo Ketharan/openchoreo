@@ -24,6 +24,48 @@ const (
 	ActionInfoLowestScopeResource  ActionInfoLowestScope = "resource"
 )
 
+// Defines values for ApprovalDecisionResult.
+const (
+	ApprovalDecisionResultApproved ApprovalDecisionResult = "Approved"
+	ApprovalDecisionResultRejected ApprovalDecisionResult = "Rejected"
+)
+
+// Defines values for ApprovalDecisionRequestResult.
+const (
+	ApprovalDecisionRequestResultApproved ApprovalDecisionRequestResult = "Approved"
+	ApprovalDecisionRequestResultRejected ApprovalDecisionRequestResult = "Rejected"
+)
+
+// Defines values for ApprovalPolicySpecChanges.
+const (
+	ApprovalPolicySpecChangesConfigChange  ApprovalPolicySpecChanges = "ConfigChange"
+	ApprovalPolicySpecChangesReleaseChange ApprovalPolicySpecChanges = "ReleaseChange"
+	ApprovalPolicySpecChangesUndeploy      ApprovalPolicySpecChanges = "Undeploy"
+)
+
+// Defines values for ApprovalRequestStatusPhase.
+const (
+	ApprovalRequestStatusPhaseApproved  ApprovalRequestStatusPhase = "Approved"
+	ApprovalRequestStatusPhaseCancelled ApprovalRequestStatusPhase = "Cancelled"
+	ApprovalRequestStatusPhaseExecuted  ApprovalRequestStatusPhase = "Executed"
+	ApprovalRequestStatusPhaseFailed    ApprovalRequestStatusPhase = "Failed"
+	ApprovalRequestStatusPhasePending   ApprovalRequestStatusPhase = "Pending"
+	ApprovalRequestStatusPhaseRejected  ApprovalRequestStatusPhase = "Rejected"
+)
+
+// Defines values for ApprovalSummaryChangeKind.
+const (
+	ApprovalSummaryChangeKindConfigChange  ApprovalSummaryChangeKind = "ConfigChange"
+	ApprovalSummaryChangeKindReleaseChange ApprovalSummaryChangeKind = "ReleaseChange"
+	ApprovalSummaryChangeKindUndeploy      ApprovalSummaryChangeKind = "Undeploy"
+)
+
+// Defines values for ApproverRefRoleRefKind.
+const (
+	ApproverRefRoleRefKindAuthzRole        ApproverRefRoleRefKind = "AuthzRole"
+	ApproverRefRoleRefKindClusterAuthzRole ApproverRefRoleRefKind = "ClusterAuthzRole"
+)
+
 // Defines values for AuthzRoleBindingSpecEffect.
 const (
 	AuthzRoleBindingSpecEffectAllow AuthzRoleBindingSpecEffect = "allow"
@@ -452,6 +494,26 @@ const (
 	WorkloadEndpointVisibilityProject   WorkloadEndpointVisibility = "project"
 )
 
+// Defines values for ApprovalPhaseQueryParam.
+const (
+	ApprovalPhaseQueryParamApproved  ApprovalPhaseQueryParam = "Approved"
+	ApprovalPhaseQueryParamCancelled ApprovalPhaseQueryParam = "Cancelled"
+	ApprovalPhaseQueryParamExecuted  ApprovalPhaseQueryParam = "Executed"
+	ApprovalPhaseQueryParamFailed    ApprovalPhaseQueryParam = "Failed"
+	ApprovalPhaseQueryParamPending   ApprovalPhaseQueryParam = "Pending"
+	ApprovalPhaseQueryParamRejected  ApprovalPhaseQueryParam = "Rejected"
+)
+
+// Defines values for ListApprovalRequestsParamsPhase.
+const (
+	Approved  ListApprovalRequestsParamsPhase = "Approved"
+	Cancelled ListApprovalRequestsParamsPhase = "Cancelled"
+	Executed  ListApprovalRequestsParamsPhase = "Executed"
+	Failed    ListApprovalRequestsParamsPhase = "Failed"
+	Pending   ListApprovalRequestsParamsPhase = "Pending"
+	Rejected  ListApprovalRequestsParamsPhase = "Rejected"
+)
+
 // ActionCapability Capabilities for a specific action
 type ActionCapability struct {
 	// Allowed Resources where action is allowed
@@ -496,6 +558,225 @@ type AgentConnectionStatus struct {
 	// Message Additional information about agent connection status
 	Message *string `json:"message,omitempty"`
 }
+
+// ApprovalDecision An approver's recorded answer
+type ApprovalDecision struct {
+	Comment   *string   `json:"comment,omitempty"`
+	DecidedAt time.Time `json:"decidedAt"`
+
+	// DecidedBy A person as resolved from their token. Not a reference to a stored user record.
+	DecidedBy ApprovalSubject        `json:"decidedBy"`
+	Result    ApprovalDecisionResult `json:"result"`
+}
+
+// ApprovalDecisionResult defines model for ApprovalDecision.Result.
+type ApprovalDecisionResult string
+
+// ApprovalDecisionRequest A decision submitted by an approver
+type ApprovalDecisionRequest struct {
+	// Comment Explains the decision. Required when rejecting.
+	Comment *string                       `json:"comment,omitempty"`
+	Result  ApprovalDecisionRequestResult `json:"result"`
+}
+
+// ApprovalDecisionRequestResult defines model for ApprovalDecisionRequest.Result.
+type ApprovalDecisionRequestResult string
+
+// ApprovalPolicy ApprovalPolicy resource.
+// Declares that an action, within a scope, requires a human decision.
+type ApprovalPolicy struct {
+	// ApiVersion API version of the resource
+	ApiVersion *string `json:"apiVersion,omitempty"`
+
+	// Kind Kind of the resource
+	Kind *string `json:"kind,omitempty"`
+
+	// Metadata Standard Kubernetes object metadata (without kind/apiVersion).
+	// Matches the structure of metav1.ObjectMeta for the fields exposed via the API.
+	Metadata ObjectMeta `json:"metadata"`
+
+	// Spec Desired state of an ApprovalPolicy
+	Spec   *ApprovalPolicySpec   `json:"spec,omitempty"`
+	Status *ApprovalPolicyStatus `json:"status,omitempty"`
+}
+
+// ApprovalPolicyList Paginated list of approval policies
+type ApprovalPolicyList struct {
+	Items []ApprovalPolicy `json:"items"`
+
+	// Pagination Cursor-based pagination metadata. Uses Kubernetes-native continuation tokens
+	// for efficient pagination through large result sets.
+	Pagination Pagination `json:"pagination"`
+}
+
+// ApprovalPolicySpec Desired state of an ApprovalPolicy
+type ApprovalPolicySpec struct {
+	// Action The action this policy gates. Must be an action with an enforcement point.
+	Action string `json:"action"`
+
+	// AllowSelfApproval Whether the requester may approve their own request
+	AllowSelfApproval *bool `json:"allowSelfApproval,omitempty"`
+
+	// Approvers Who may decide. Any one of them is sufficient.
+	Approvers []ApproverRef `json:"approvers"`
+
+	// Changes Kinds of change that are gated. Omitted gates every kind, so narrowing is
+	// deliberate: a policy listing only ReleaseChange leaves undeploy and config-only
+	// edits ungated.
+	Changes *[]ApprovalPolicySpecChanges `json:"changes,omitempty"`
+
+	// RequestTTLAfterCompletion How long decided requests are retained. Pending requests are never auto-deleted.
+	RequestTTLAfterCompletion *string `json:"requestTTLAfterCompletion,omitempty"`
+
+	// Scope Narrows a policy to part of the ownership hierarchy. An empty field matches anything.
+	Scope *ApprovalScope `json:"scope,omitempty"`
+
+	// Suspend Stops the policy gating anything without deleting it
+	Suspend *bool `json:"suspend,omitempty"`
+}
+
+// ApprovalPolicySpecChanges defines model for ApprovalPolicySpec.Changes.
+type ApprovalPolicySpecChanges string
+
+// ApprovalPolicyStatus Observed state of an ApprovalPolicy
+type ApprovalPolicyStatus struct {
+	Conditions         *[]Condition `json:"conditions,omitempty"`
+	ObservedGeneration *int64       `json:"observedGeneration,omitempty"`
+}
+
+// ApprovalRequest ApprovalRequest resource.
+// One pending human decision about one specific change.
+type ApprovalRequest struct {
+	ApiVersion *string `json:"apiVersion,omitempty"`
+	Kind       *string `json:"kind,omitempty"`
+
+	// Metadata Standard Kubernetes object metadata (without kind/apiVersion).
+	// Matches the structure of metav1.ObjectMeta for the fields exposed via the API.
+	Metadata ObjectMeta `json:"metadata"`
+
+	// Spec Desired state of an ApprovalRequest. Immutable except for the decision.
+	Spec   *ApprovalRequestSpec   `json:"spec,omitempty"`
+	Status *ApprovalRequestStatus `json:"status,omitempty"`
+}
+
+// ApprovalRequestList Paginated list of approval requests
+type ApprovalRequestList struct {
+	Items []ApprovalRequest `json:"items"`
+
+	// Pagination Cursor-based pagination metadata. Uses Kubernetes-native continuation tokens
+	// for efficient pagination through large result sets.
+	Pagination Pagination `json:"pagination"`
+}
+
+// ApprovalRequestSpec Desired state of an ApprovalRequest. Immutable except for the decision.
+type ApprovalRequestSpec struct {
+	Action string `json:"action"`
+
+	// Decision An approver's recorded answer
+	Decision *ApprovalDecision `json:"decision,omitempty"`
+
+	// Message The requester's justification
+	Message *string `json:"message,omitempty"`
+
+	// PolicyName The policy that gated the action
+	PolicyName string `json:"policyName"`
+
+	// RequestedState The complete intent being approved, not just the release name: binding an approval
+	// to the release name alone would let configuration change between review and execution.
+	RequestedState *map[string]interface{} `json:"requestedState,omitempty"`
+
+	// Requester A person as resolved from their token. Not a reference to a stored user record.
+	Requester ApprovalSubject `json:"requester"`
+
+	// StateFingerprint Digest of requestedState. The action may only proceed when the state being applied
+	// hashes to this value, which is what stops an approval being replayed.
+	StateFingerprint string `json:"stateFingerprint"`
+
+	// Summary Evidence shown to an approver. Held on the request so an approver can decide without
+	// read access to the requester's project, and so the record preserves what they saw.
+	Summary *ApprovalSummary `json:"summary,omitempty"`
+
+	// Target The object an action would act upon
+	Target             ApprovalTarget `json:"target"`
+	TtlAfterCompletion *string        `json:"ttlAfterCompletion,omitempty"`
+}
+
+// ApprovalRequestStatus Observed state of an ApprovalRequest
+type ApprovalRequestStatus struct {
+	CompletedAt        *time.Time                  `json:"completedAt,omitempty"`
+	Conditions         *[]Condition                `json:"conditions,omitempty"`
+	ObservedGeneration *int64                      `json:"observedGeneration,omitempty"`
+	Phase              *ApprovalRequestStatusPhase `json:"phase,omitempty"`
+
+	// StaleReason Set when a pending request can no longer be fulfilled as written
+	StaleReason *string `json:"staleReason,omitempty"`
+}
+
+// ApprovalRequestStatusPhase defines model for ApprovalRequestStatus.Phase.
+type ApprovalRequestStatusPhase string
+
+// ApprovalScope Narrows a policy to part of the ownership hierarchy. An empty field matches anything.
+type ApprovalScope struct {
+	Component   *string `json:"component,omitempty"`
+	Environment *string `json:"environment,omitempty"`
+
+	// FromEnvironment Narrows to promotions originating in this environment
+	FromEnvironment *string `json:"fromEnvironment,omitempty"`
+	Project         *string `json:"project,omitempty"`
+}
+
+// ApprovalSubject A person as resolved from their token. Not a reference to a stored user record.
+type ApprovalSubject struct {
+	DisplayName *string `json:"displayName,omitempty"`
+
+	// Id Stable subject identifier from the token
+	Id string `json:"id"`
+}
+
+// ApprovalSummary Evidence shown to an approver. Held on the request so an approver can decide without
+// read access to the requester's project, and so the record preserves what they saw.
+type ApprovalSummary struct {
+	ChangeKind *ApprovalSummaryChangeKind `json:"changeKind,omitempty"`
+	Current    *string                    `json:"current,omitempty"`
+	Details    *[]string                  `json:"details,omitempty"`
+	Requested  *string                    `json:"requested,omitempty"`
+}
+
+// ApprovalSummaryChangeKind defines model for ApprovalSummary.ChangeKind.
+type ApprovalSummaryChangeKind string
+
+// ApprovalTarget The object an action would act upon
+type ApprovalTarget struct {
+	Component   *string `json:"component,omitempty"`
+	Environment *string `json:"environment,omitempty"`
+	Kind        string  `json:"kind"`
+	Name        string  `json:"name"`
+	Project     *string `json:"project,omitempty"`
+}
+
+// ApproverRef Who may decide. Exactly one of roleRef or entitlement must be set. A claim-matched
+// subject cannot be enumerated, so a named individual is the only form that lets a
+// requester see who to ask.
+type ApproverRef struct {
+	Entitlement *struct {
+		Claim string `json:"claim"`
+		Value string `json:"value"`
+	} `json:"entitlement,omitempty"`
+	RoleRef *struct {
+		Kind ApproverRefRoleRefKind `json:"kind"`
+		Name string                 `json:"name"`
+	} `json:"roleRef,omitempty"`
+
+	// Scope Bounds where a role-based approver's authority applies
+	Scope *struct {
+		Component *string `json:"component,omitempty"`
+		Project   *string `json:"project,omitempty"`
+		Resource  *string `json:"resource,omitempty"`
+	} `json:"scope,omitempty"`
+}
+
+// ApproverRefRoleRefKind defines model for ApproverRef.RoleRef.Kind.
+type ApproverRefRoleRefKind string
 
 // AuthMechanismConfig Configuration for an authentication mechanism
 type AuthMechanismConfig struct {
@@ -4542,6 +4823,18 @@ type WorkloadSpec struct {
 // WorkloadStatus Observed state of a Workload
 type WorkloadStatus = map[string]interface{}
 
+// ApprovalEnvironmentQueryParam defines model for ApprovalEnvironmentQueryParam.
+type ApprovalEnvironmentQueryParam = string
+
+// ApprovalPhaseQueryParam defines model for ApprovalPhaseQueryParam.
+type ApprovalPhaseQueryParam string
+
+// ApprovalPolicyNameParam defines model for ApprovalPolicyNameParam.
+type ApprovalPolicyNameParam = string
+
+// ApprovalRequestNameParam defines model for ApprovalRequestNameParam.
+type ApprovalRequestNameParam = string
+
 // ClusterComponentTypeNameParam defines model for ClusterComponentTypeNameParam.
 type ClusterComponentTypeNameParam = string
 
@@ -4899,6 +5192,35 @@ type ListNamespacesParams struct {
 	// Pass the `nextCursor` value from pagination metadata to fetch the next page.
 	Cursor *CursorParam `form:"cursor,omitempty" json:"cursor,omitempty"`
 }
+
+// ListApprovalPoliciesParams defines parameters for ListApprovalPolicies.
+type ListApprovalPoliciesParams struct {
+	// Limit Maximum number of items to return per page
+	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Cursor Opaque pagination cursor from a previous response.
+	// Pass the `nextCursor` value from pagination metadata to fetch the next page.
+	Cursor *CursorParam `form:"cursor,omitempty" json:"cursor,omitempty"`
+}
+
+// ListApprovalRequestsParams defines parameters for ListApprovalRequests.
+type ListApprovalRequestsParams struct {
+	// Phase Filter requests by lifecycle phase
+	Phase *ListApprovalRequestsParamsPhase `form:"phase,omitempty" json:"phase,omitempty"`
+
+	// Environment Filter requests by the environment they target
+	Environment *ApprovalEnvironmentQueryParam `form:"environment,omitempty" json:"environment,omitempty"`
+
+	// Limit Maximum number of items to return per page
+	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Cursor Opaque pagination cursor from a previous response.
+	// Pass the `nextCursor` value from pagination metadata to fetch the next page.
+	Cursor *CursorParam `form:"cursor,omitempty" json:"cursor,omitempty"`
+}
+
+// ListApprovalRequestsParamsPhase defines parameters for ListApprovalRequests.
+type ListApprovalRequestsParamsPhase string
 
 // ListNamespaceRoleBindingsParams defines parameters for ListNamespaceRoleBindings.
 type ListNamespaceRoleBindingsParams struct {
@@ -5493,6 +5815,15 @@ type CreateNamespaceJSONRequestBody = Namespace
 
 // UpdateNamespaceJSONRequestBody defines body for UpdateNamespace for application/json ContentType.
 type UpdateNamespaceJSONRequestBody = Namespace
+
+// CreateApprovalPolicyJSONRequestBody defines body for CreateApprovalPolicy for application/json ContentType.
+type CreateApprovalPolicyJSONRequestBody = ApprovalPolicy
+
+// UpdateApprovalPolicyJSONRequestBody defines body for UpdateApprovalPolicy for application/json ContentType.
+type UpdateApprovalPolicyJSONRequestBody = ApprovalPolicy
+
+// DecideApprovalRequestJSONRequestBody defines body for DecideApprovalRequest for application/json ContentType.
+type DecideApprovalRequestJSONRequestBody = ApprovalDecisionRequest
 
 // CreateNamespaceRoleBindingJSONRequestBody defines body for CreateNamespaceRoleBinding for application/json ContentType.
 type CreateNamespaceRoleBindingJSONRequestBody = AuthzRoleBinding

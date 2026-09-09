@@ -62,6 +62,7 @@ func TestBuildRootCmd_Subcommands(t *testing.T) {
 		"secret",
 		"workload",
 		"deploymentpipeline",
+		"approval",
 		"observabilityalertsnotificationchannel",
 		"remote",
 	}

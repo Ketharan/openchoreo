@@ -40,8 +40,9 @@ func TestCreateReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("CreateReleaseBinding", mock.Anything, "ns-1", rb).Return(rb, nil)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		result, err := svc.CreateReleaseBinding(testutil.AuthzContext(), "ns-1", rb)
 		require.NoError(t, err)
@@ -54,8 +55,9 @@ func TestCreateReleaseBinding_AuthzCheck(t *testing.T) {
 		pdp := testutil.DenyPDP()
 		mockSvc := mocks.NewMockService(t)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		_, err := svc.CreateReleaseBinding(testutil.AuthzContext(), "ns-1", rb)
 		require.ErrorIs(t, err, services.ErrForbidden)
@@ -73,8 +75,9 @@ func TestUpdateReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc.On("GetReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(rb, nil)
 		mockSvc.On("UpdateReleaseBinding", mock.Anything, "ns-1", rb).Return(rb, nil)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		result, err := svc.UpdateReleaseBinding(testutil.AuthzContext(), "ns-1", rb)
 		require.NoError(t, err)
@@ -88,8 +91,9 @@ func TestUpdateReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("GetReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(rb, nil)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		_, err := svc.UpdateReleaseBinding(testutil.AuthzContext(), "ns-1", rb)
 		require.ErrorIs(t, err, services.ErrForbidden)
@@ -101,8 +105,9 @@ func TestUpdateReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("GetReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(nil, fetchErr)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		_, err := svc.UpdateReleaseBinding(testutil.AuthzContext(), "ns-1", rb)
 		require.ErrorIs(t, err, fetchErr)
@@ -133,8 +138,9 @@ func TestListReleaseBindings_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("ListReleaseBindings", mock.Anything, "ns-1", "my-comp", mock.Anything).Return(&services.ListResult[openchoreov1alpha1.ReleaseBinding]{Items: rbs}, nil)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		result, err := svc.ListReleaseBindings(testutil.AuthzContext(), "ns-1", "my-comp", services.ListOptions{Limit: 10})
 		require.NoError(t, err)
@@ -151,8 +157,9 @@ func TestListReleaseBindings_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("ListReleaseBindings", mock.Anything, "ns-1", "my-comp", mock.Anything).Return(&services.ListResult[openchoreov1alpha1.ReleaseBinding]{Items: rbs}, nil)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		result, err := svc.ListReleaseBindings(testutil.AuthzContext(), "ns-1", "my-comp", services.ListOptions{Limit: 10})
 		require.NoError(t, err)
@@ -170,8 +177,9 @@ func TestGetReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("GetReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(fetched, nil)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		result, err := svc.GetReleaseBinding(testutil.AuthzContext(), "ns-1", "my-rb")
 		require.NoError(t, err)
@@ -185,8 +193,9 @@ func TestGetReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("GetReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(fetched, nil)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		_, err := svc.GetReleaseBinding(testutil.AuthzContext(), "ns-1", "my-rb")
 		require.ErrorIs(t, err, services.ErrForbidden)
@@ -198,8 +207,9 @@ func TestGetReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("GetReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(nil, fetchErr)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		_, err := svc.GetReleaseBinding(testutil.AuthzContext(), "ns-1", "my-rb")
 		require.ErrorIs(t, err, fetchErr)
@@ -218,8 +228,9 @@ func TestDeleteReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc.On("GetReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(fetched, nil)
 		mockSvc.On("DeleteReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(nil)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		err := svc.DeleteReleaseBinding(testutil.AuthzContext(), "ns-1", "my-rb")
 		require.NoError(t, err)
@@ -232,8 +243,9 @@ func TestDeleteReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("GetReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(fetched, nil)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		err := svc.DeleteReleaseBinding(testutil.AuthzContext(), "ns-1", "my-rb")
 		require.ErrorIs(t, err, services.ErrForbidden)
@@ -245,8 +257,9 @@ func TestDeleteReleaseBinding_AuthzCheck(t *testing.T) {
 		mockSvc := mocks.NewMockService(t)
 		mockSvc.On("GetReleaseBinding", mock.Anything, "ns-1", "my-rb").Return(nil, fetchErr)
 		svc := &releaseBindingServiceWithAuthz{
-			internal: mockSvc,
-			authz:    testutil.NewTestAuthzChecker(pdp),
+			internal:  mockSvc,
+			k8sClient: testutil.NewFakeClient(),
+			authz:     testutil.NewTestAuthzChecker(pdp),
 		}
 		err := svc.DeleteReleaseBinding(testutil.AuthzContext(), "ns-1", "my-rb")
 		require.ErrorIs(t, err, fetchErr)

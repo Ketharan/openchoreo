@@ -24,6 +24,232 @@ func (_m *MockClientWithResponsesInterface) EXPECT() *MockClientWithResponsesInt
 	return &MockClientWithResponsesInterface_Expecter{mock: &_m.Mock}
 }
 
+// CancelApprovalRequestWithResponse provides a mock function with given fields: ctx, namespaceName, approvalRequestName, reqEditors
+func (_m *MockClientWithResponsesInterface) CancelApprovalRequestWithResponse(ctx context.Context, namespaceName string, approvalRequestName string, reqEditors ...gen.RequestEditorFn) (*gen.CancelApprovalRequestResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, approvalRequestName)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CancelApprovalRequestWithResponse")
+	}
+
+	var r0 *gen.CancelApprovalRequestResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, ...gen.RequestEditorFn) (*gen.CancelApprovalRequestResp, error)); ok {
+		return rf(ctx, namespaceName, approvalRequestName, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, ...gen.RequestEditorFn) *gen.CancelApprovalRequestResp); ok {
+		r0 = rf(ctx, namespaceName, approvalRequestName, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.CancelApprovalRequestResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, approvalRequestName, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CancelApprovalRequestWithResponse'
+type MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call struct {
+	*mock.Call
+}
+
+// CancelApprovalRequestWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalRequestName string
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) CancelApprovalRequestWithResponse(ctx interface{}, namespaceName interface{}, approvalRequestName interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call {
+	return &MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call{Call: _e.mock.On("CancelApprovalRequestWithResponse",
+		append([]interface{}{ctx, namespaceName, approvalRequestName}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, approvalRequestName string, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call) Return(_a0 *gen.CancelApprovalRequestResp, _a1 error) *MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call) RunAndReturn(run func(context.Context, string, string, ...gen.RequestEditorFn) (*gen.CancelApprovalRequestResp, error)) *MockClientWithResponsesInterface_CancelApprovalRequestWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreateApprovalPolicyWithBodyWithResponse provides a mock function with given fields: ctx, namespaceName, contentType, body, reqEditors
+func (_m *MockClientWithResponsesInterface) CreateApprovalPolicyWithBodyWithResponse(ctx context.Context, namespaceName string, contentType string, body io.Reader, reqEditors ...gen.RequestEditorFn) (*gen.CreateApprovalPolicyResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateApprovalPolicyWithBodyWithResponse")
+	}
+
+	var r0 *gen.CreateApprovalPolicyResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, io.Reader, ...gen.RequestEditorFn) (*gen.CreateApprovalPolicyResp, error)); ok {
+		return rf(ctx, namespaceName, contentType, body, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, io.Reader, ...gen.RequestEditorFn) *gen.CreateApprovalPolicyResp); ok {
+		r0 = rf(ctx, namespaceName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.CreateApprovalPolicyResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, io.Reader, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateApprovalPolicyWithBodyWithResponse'
+type MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call struct {
+	*mock.Call
+}
+
+// CreateApprovalPolicyWithBodyWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - contentType string
+//   - body io.Reader
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) CreateApprovalPolicyWithBodyWithResponse(ctx interface{}, namespaceName interface{}, contentType interface{}, body interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call {
+	return &MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call{Call: _e.mock.On("CreateApprovalPolicyWithBodyWithResponse",
+		append([]interface{}{ctx, namespaceName, contentType, body}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, contentType string, body io.Reader, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-4)
+		for i, a := range args[4:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(io.Reader), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call) Return(_a0 *gen.CreateApprovalPolicyResp, _a1 error) *MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call) RunAndReturn(run func(context.Context, string, string, io.Reader, ...gen.RequestEditorFn) (*gen.CreateApprovalPolicyResp, error)) *MockClientWithResponsesInterface_CreateApprovalPolicyWithBodyWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreateApprovalPolicyWithResponse provides a mock function with given fields: ctx, namespaceName, body, reqEditors
+func (_m *MockClientWithResponsesInterface) CreateApprovalPolicyWithResponse(ctx context.Context, namespaceName string, body gen.ApprovalPolicy, reqEditors ...gen.RequestEditorFn) (*gen.CreateApprovalPolicyResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateApprovalPolicyWithResponse")
+	}
+
+	var r0 *gen.CreateApprovalPolicyResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, gen.ApprovalPolicy, ...gen.RequestEditorFn) (*gen.CreateApprovalPolicyResp, error)); ok {
+		return rf(ctx, namespaceName, body, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, gen.ApprovalPolicy, ...gen.RequestEditorFn) *gen.CreateApprovalPolicyResp); ok {
+		r0 = rf(ctx, namespaceName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.CreateApprovalPolicyResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, gen.ApprovalPolicy, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateApprovalPolicyWithResponse'
+type MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call struct {
+	*mock.Call
+}
+
+// CreateApprovalPolicyWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - body gen.ApprovalPolicy
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) CreateApprovalPolicyWithResponse(ctx interface{}, namespaceName interface{}, body interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call {
+	return &MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call{Call: _e.mock.On("CreateApprovalPolicyWithResponse",
+		append([]interface{}{ctx, namespaceName, body}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, body gen.ApprovalPolicy, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(gen.ApprovalPolicy), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call) Return(_a0 *gen.CreateApprovalPolicyResp, _a1 error) *MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call) RunAndReturn(run func(context.Context, string, gen.ApprovalPolicy, ...gen.RequestEditorFn) (*gen.CreateApprovalPolicyResp, error)) *MockClientWithResponsesInterface_CreateApprovalPolicyWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateClusterComponentTypeWithBodyWithResponse provides a mock function with given fields: ctx, contentType, body, reqEditors
 func (_m *MockClientWithResponsesInterface) CreateClusterComponentTypeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...gen.RequestEditorFn) (*gen.CreateClusterComponentTypeResp, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -5740,6 +5966,234 @@ func (_c *MockClientWithResponsesInterface_CreateWorkloadWithResponse_Call) RunA
 	return _c
 }
 
+// DecideApprovalRequestWithBodyWithResponse provides a mock function with given fields: ctx, namespaceName, approvalRequestName, contentType, body, reqEditors
+func (_m *MockClientWithResponsesInterface) DecideApprovalRequestWithBodyWithResponse(ctx context.Context, namespaceName string, approvalRequestName string, contentType string, body io.Reader, reqEditors ...gen.RequestEditorFn) (*gen.DecideApprovalRequestResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, approvalRequestName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DecideApprovalRequestWithBodyWithResponse")
+	}
+
+	var r0 *gen.DecideApprovalRequestResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, io.Reader, ...gen.RequestEditorFn) (*gen.DecideApprovalRequestResp, error)); ok {
+		return rf(ctx, namespaceName, approvalRequestName, contentType, body, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, io.Reader, ...gen.RequestEditorFn) *gen.DecideApprovalRequestResp); ok {
+		r0 = rf(ctx, namespaceName, approvalRequestName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.DecideApprovalRequestResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, io.Reader, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, approvalRequestName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DecideApprovalRequestWithBodyWithResponse'
+type MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call struct {
+	*mock.Call
+}
+
+// DecideApprovalRequestWithBodyWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalRequestName string
+//   - contentType string
+//   - body io.Reader
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) DecideApprovalRequestWithBodyWithResponse(ctx interface{}, namespaceName interface{}, approvalRequestName interface{}, contentType interface{}, body interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call {
+	return &MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call{Call: _e.mock.On("DecideApprovalRequestWithBodyWithResponse",
+		append([]interface{}{ctx, namespaceName, approvalRequestName, contentType, body}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, approvalRequestName string, contentType string, body io.Reader, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-5)
+		for i, a := range args[5:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(io.Reader), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call) Return(_a0 *gen.DecideApprovalRequestResp, _a1 error) *MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call) RunAndReturn(run func(context.Context, string, string, string, io.Reader, ...gen.RequestEditorFn) (*gen.DecideApprovalRequestResp, error)) *MockClientWithResponsesInterface_DecideApprovalRequestWithBodyWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DecideApprovalRequestWithResponse provides a mock function with given fields: ctx, namespaceName, approvalRequestName, body, reqEditors
+func (_m *MockClientWithResponsesInterface) DecideApprovalRequestWithResponse(ctx context.Context, namespaceName string, approvalRequestName string, body gen.ApprovalDecisionRequest, reqEditors ...gen.RequestEditorFn) (*gen.DecideApprovalRequestResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, approvalRequestName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DecideApprovalRequestWithResponse")
+	}
+
+	var r0 *gen.DecideApprovalRequestResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, gen.ApprovalDecisionRequest, ...gen.RequestEditorFn) (*gen.DecideApprovalRequestResp, error)); ok {
+		return rf(ctx, namespaceName, approvalRequestName, body, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, gen.ApprovalDecisionRequest, ...gen.RequestEditorFn) *gen.DecideApprovalRequestResp); ok {
+		r0 = rf(ctx, namespaceName, approvalRequestName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.DecideApprovalRequestResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, gen.ApprovalDecisionRequest, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, approvalRequestName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DecideApprovalRequestWithResponse'
+type MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call struct {
+	*mock.Call
+}
+
+// DecideApprovalRequestWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalRequestName string
+//   - body gen.ApprovalDecisionRequest
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) DecideApprovalRequestWithResponse(ctx interface{}, namespaceName interface{}, approvalRequestName interface{}, body interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call {
+	return &MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call{Call: _e.mock.On("DecideApprovalRequestWithResponse",
+		append([]interface{}{ctx, namespaceName, approvalRequestName, body}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, approvalRequestName string, body gen.ApprovalDecisionRequest, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-4)
+		for i, a := range args[4:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(gen.ApprovalDecisionRequest), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call) Return(_a0 *gen.DecideApprovalRequestResp, _a1 error) *MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call) RunAndReturn(run func(context.Context, string, string, gen.ApprovalDecisionRequest, ...gen.RequestEditorFn) (*gen.DecideApprovalRequestResp, error)) *MockClientWithResponsesInterface_DecideApprovalRequestWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteApprovalPolicyWithResponse provides a mock function with given fields: ctx, namespaceName, approvalPolicyName, reqEditors
+func (_m *MockClientWithResponsesInterface) DeleteApprovalPolicyWithResponse(ctx context.Context, namespaceName string, approvalPolicyName string, reqEditors ...gen.RequestEditorFn) (*gen.DeleteApprovalPolicyResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, approvalPolicyName)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteApprovalPolicyWithResponse")
+	}
+
+	var r0 *gen.DeleteApprovalPolicyResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, ...gen.RequestEditorFn) (*gen.DeleteApprovalPolicyResp, error)); ok {
+		return rf(ctx, namespaceName, approvalPolicyName, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, ...gen.RequestEditorFn) *gen.DeleteApprovalPolicyResp); ok {
+		r0 = rf(ctx, namespaceName, approvalPolicyName, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.DeleteApprovalPolicyResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, approvalPolicyName, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteApprovalPolicyWithResponse'
+type MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call struct {
+	*mock.Call
+}
+
+// DeleteApprovalPolicyWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalPolicyName string
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) DeleteApprovalPolicyWithResponse(ctx interface{}, namespaceName interface{}, approvalPolicyName interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call {
+	return &MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call{Call: _e.mock.On("DeleteApprovalPolicyWithResponse",
+		append([]interface{}{ctx, namespaceName, approvalPolicyName}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, approvalPolicyName string, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call) Return(_a0 *gen.DeleteApprovalPolicyResp, _a1 error) *MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call) RunAndReturn(run func(context.Context, string, string, ...gen.RequestEditorFn) (*gen.DeleteApprovalPolicyResp, error)) *MockClientWithResponsesInterface_DeleteApprovalPolicyWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteClusterComponentTypeWithResponse provides a mock function with given fields: ctx, cctName, reqEditors
 func (_m *MockClientWithResponsesInterface) DeleteClusterComponentTypeWithResponse(ctx context.Context, cctName string, reqEditors ...gen.RequestEditorFn) (*gen.DeleteClusterComponentTypeResp, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -8877,6 +9331,156 @@ func (_c *MockClientWithResponsesInterface_GenerateReleaseWithResponse_Call) Ret
 }
 
 func (_c *MockClientWithResponsesInterface_GenerateReleaseWithResponse_Call) RunAndReturn(run func(context.Context, string, string, gen.GenerateReleaseRequest, ...gen.RequestEditorFn) (*gen.GenerateReleaseResp, error)) *MockClientWithResponsesInterface_GenerateReleaseWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetApprovalPolicyWithResponse provides a mock function with given fields: ctx, namespaceName, approvalPolicyName, reqEditors
+func (_m *MockClientWithResponsesInterface) GetApprovalPolicyWithResponse(ctx context.Context, namespaceName string, approvalPolicyName string, reqEditors ...gen.RequestEditorFn) (*gen.GetApprovalPolicyResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, approvalPolicyName)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetApprovalPolicyWithResponse")
+	}
+
+	var r0 *gen.GetApprovalPolicyResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, ...gen.RequestEditorFn) (*gen.GetApprovalPolicyResp, error)); ok {
+		return rf(ctx, namespaceName, approvalPolicyName, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, ...gen.RequestEditorFn) *gen.GetApprovalPolicyResp); ok {
+		r0 = rf(ctx, namespaceName, approvalPolicyName, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.GetApprovalPolicyResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, approvalPolicyName, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetApprovalPolicyWithResponse'
+type MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call struct {
+	*mock.Call
+}
+
+// GetApprovalPolicyWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalPolicyName string
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) GetApprovalPolicyWithResponse(ctx interface{}, namespaceName interface{}, approvalPolicyName interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call {
+	return &MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call{Call: _e.mock.On("GetApprovalPolicyWithResponse",
+		append([]interface{}{ctx, namespaceName, approvalPolicyName}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, approvalPolicyName string, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call) Return(_a0 *gen.GetApprovalPolicyResp, _a1 error) *MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call) RunAndReturn(run func(context.Context, string, string, ...gen.RequestEditorFn) (*gen.GetApprovalPolicyResp, error)) *MockClientWithResponsesInterface_GetApprovalPolicyWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetApprovalRequestWithResponse provides a mock function with given fields: ctx, namespaceName, approvalRequestName, reqEditors
+func (_m *MockClientWithResponsesInterface) GetApprovalRequestWithResponse(ctx context.Context, namespaceName string, approvalRequestName string, reqEditors ...gen.RequestEditorFn) (*gen.GetApprovalRequestResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, approvalRequestName)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetApprovalRequestWithResponse")
+	}
+
+	var r0 *gen.GetApprovalRequestResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, ...gen.RequestEditorFn) (*gen.GetApprovalRequestResp, error)); ok {
+		return rf(ctx, namespaceName, approvalRequestName, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, ...gen.RequestEditorFn) *gen.GetApprovalRequestResp); ok {
+		r0 = rf(ctx, namespaceName, approvalRequestName, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.GetApprovalRequestResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, approvalRequestName, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetApprovalRequestWithResponse'
+type MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call struct {
+	*mock.Call
+}
+
+// GetApprovalRequestWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalRequestName string
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) GetApprovalRequestWithResponse(ctx interface{}, namespaceName interface{}, approvalRequestName interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call {
+	return &MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call{Call: _e.mock.On("GetApprovalRequestWithResponse",
+		append([]interface{}{ctx, namespaceName, approvalRequestName}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, approvalRequestName string, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(string), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call) Return(_a0 *gen.GetApprovalRequestResp, _a1 error) *MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call) RunAndReturn(run func(context.Context, string, string, ...gen.RequestEditorFn) (*gen.GetApprovalRequestResp, error)) *MockClientWithResponsesInterface_GetApprovalRequestWithResponse_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -13582,6 +14186,156 @@ func (_c *MockClientWithResponsesInterface_ListActionsWithResponse_Call) RunAndR
 	return _c
 }
 
+// ListApprovalPoliciesWithResponse provides a mock function with given fields: ctx, namespaceName, params, reqEditors
+func (_m *MockClientWithResponsesInterface) ListApprovalPoliciesWithResponse(ctx context.Context, namespaceName string, params *gen.ListApprovalPoliciesParams, reqEditors ...gen.RequestEditorFn) (*gen.ListApprovalPoliciesResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListApprovalPoliciesWithResponse")
+	}
+
+	var r0 *gen.ListApprovalPoliciesResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *gen.ListApprovalPoliciesParams, ...gen.RequestEditorFn) (*gen.ListApprovalPoliciesResp, error)); ok {
+		return rf(ctx, namespaceName, params, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *gen.ListApprovalPoliciesParams, ...gen.RequestEditorFn) *gen.ListApprovalPoliciesResp); ok {
+		r0 = rf(ctx, namespaceName, params, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.ListApprovalPoliciesResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *gen.ListApprovalPoliciesParams, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, params, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListApprovalPoliciesWithResponse'
+type MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call struct {
+	*mock.Call
+}
+
+// ListApprovalPoliciesWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - params *gen.ListApprovalPoliciesParams
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) ListApprovalPoliciesWithResponse(ctx interface{}, namespaceName interface{}, params interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call {
+	return &MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call{Call: _e.mock.On("ListApprovalPoliciesWithResponse",
+		append([]interface{}{ctx, namespaceName, params}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, params *gen.ListApprovalPoliciesParams, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(*gen.ListApprovalPoliciesParams), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call) Return(_a0 *gen.ListApprovalPoliciesResp, _a1 error) *MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call) RunAndReturn(run func(context.Context, string, *gen.ListApprovalPoliciesParams, ...gen.RequestEditorFn) (*gen.ListApprovalPoliciesResp, error)) *MockClientWithResponsesInterface_ListApprovalPoliciesWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListApprovalRequestsWithResponse provides a mock function with given fields: ctx, namespaceName, params, reqEditors
+func (_m *MockClientWithResponsesInterface) ListApprovalRequestsWithResponse(ctx context.Context, namespaceName string, params *gen.ListApprovalRequestsParams, reqEditors ...gen.RequestEditorFn) (*gen.ListApprovalRequestsResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListApprovalRequestsWithResponse")
+	}
+
+	var r0 *gen.ListApprovalRequestsResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *gen.ListApprovalRequestsParams, ...gen.RequestEditorFn) (*gen.ListApprovalRequestsResp, error)); ok {
+		return rf(ctx, namespaceName, params, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *gen.ListApprovalRequestsParams, ...gen.RequestEditorFn) *gen.ListApprovalRequestsResp); ok {
+		r0 = rf(ctx, namespaceName, params, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.ListApprovalRequestsResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *gen.ListApprovalRequestsParams, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, params, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListApprovalRequestsWithResponse'
+type MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call struct {
+	*mock.Call
+}
+
+// ListApprovalRequestsWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - params *gen.ListApprovalRequestsParams
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) ListApprovalRequestsWithResponse(ctx interface{}, namespaceName interface{}, params interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call {
+	return &MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call{Call: _e.mock.On("ListApprovalRequestsWithResponse",
+		append([]interface{}{ctx, namespaceName, params}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, params *gen.ListApprovalRequestsParams, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-3)
+		for i, a := range args[3:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(*gen.ListApprovalRequestsParams), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call) Return(_a0 *gen.ListApprovalRequestsResp, _a1 error) *MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call) RunAndReturn(run func(context.Context, string, *gen.ListApprovalRequestsParams, ...gen.RequestEditorFn) (*gen.ListApprovalRequestsResp, error)) *MockClientWithResponsesInterface_ListApprovalRequestsWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListClusterComponentTypesWithResponse provides a mock function with given fields: ctx, params, reqEditors
 func (_m *MockClientWithResponsesInterface) ListClusterComponentTypesWithResponse(ctx context.Context, params *gen.ListClusterComponentTypesParams, reqEditors ...gen.RequestEditorFn) (*gen.ListClusterComponentTypesResp, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -16642,6 +17396,159 @@ func (_c *MockClientWithResponsesInterface_TriggerReleaseBindingCronJobWithRespo
 }
 
 func (_c *MockClientWithResponsesInterface_TriggerReleaseBindingCronJobWithResponse_Call) RunAndReturn(run func(context.Context, string, string, gen.CronJobTriggerRequest, ...gen.RequestEditorFn) (*gen.TriggerReleaseBindingCronJobResp, error)) *MockClientWithResponsesInterface_TriggerReleaseBindingCronJobWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateApprovalPolicyWithBodyWithResponse provides a mock function with given fields: ctx, namespaceName, approvalPolicyName, contentType, body, reqEditors
+func (_m *MockClientWithResponsesInterface) UpdateApprovalPolicyWithBodyWithResponse(ctx context.Context, namespaceName string, approvalPolicyName string, contentType string, body io.Reader, reqEditors ...gen.RequestEditorFn) (*gen.UpdateApprovalPolicyResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, approvalPolicyName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateApprovalPolicyWithBodyWithResponse")
+	}
+
+	var r0 *gen.UpdateApprovalPolicyResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, io.Reader, ...gen.RequestEditorFn) (*gen.UpdateApprovalPolicyResp, error)); ok {
+		return rf(ctx, namespaceName, approvalPolicyName, contentType, body, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, io.Reader, ...gen.RequestEditorFn) *gen.UpdateApprovalPolicyResp); ok {
+		r0 = rf(ctx, namespaceName, approvalPolicyName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.UpdateApprovalPolicyResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, io.Reader, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, approvalPolicyName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateApprovalPolicyWithBodyWithResponse'
+type MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call struct {
+	*mock.Call
+}
+
+// UpdateApprovalPolicyWithBodyWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalPolicyName string
+//   - contentType string
+//   - body io.Reader
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) UpdateApprovalPolicyWithBodyWithResponse(ctx interface{}, namespaceName interface{}, approvalPolicyName interface{}, contentType interface{}, body interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call {
+	return &MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call{Call: _e.mock.On("UpdateApprovalPolicyWithBodyWithResponse",
+		append([]interface{}{ctx, namespaceName, approvalPolicyName, contentType, body}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, approvalPolicyName string, contentType string, body io.Reader, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-5)
+		for i, a := range args[5:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string), args[4].(io.Reader), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call) Return(_a0 *gen.UpdateApprovalPolicyResp, _a1 error) *MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call) RunAndReturn(run func(context.Context, string, string, string, io.Reader, ...gen.RequestEditorFn) (*gen.UpdateApprovalPolicyResp, error)) *MockClientWithResponsesInterface_UpdateApprovalPolicyWithBodyWithResponse_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateApprovalPolicyWithResponse provides a mock function with given fields: ctx, namespaceName, approvalPolicyName, body, reqEditors
+func (_m *MockClientWithResponsesInterface) UpdateApprovalPolicyWithResponse(ctx context.Context, namespaceName string, approvalPolicyName string, body gen.ApprovalPolicy, reqEditors ...gen.RequestEditorFn) (*gen.UpdateApprovalPolicyResp, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, namespaceName, approvalPolicyName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateApprovalPolicyWithResponse")
+	}
+
+	var r0 *gen.UpdateApprovalPolicyResp
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, gen.ApprovalPolicy, ...gen.RequestEditorFn) (*gen.UpdateApprovalPolicyResp, error)); ok {
+		return rf(ctx, namespaceName, approvalPolicyName, body, reqEditors...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, gen.ApprovalPolicy, ...gen.RequestEditorFn) *gen.UpdateApprovalPolicyResp); ok {
+		r0 = rf(ctx, namespaceName, approvalPolicyName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gen.UpdateApprovalPolicyResp)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, gen.ApprovalPolicy, ...gen.RequestEditorFn) error); ok {
+		r1 = rf(ctx, namespaceName, approvalPolicyName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateApprovalPolicyWithResponse'
+type MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call struct {
+	*mock.Call
+}
+
+// UpdateApprovalPolicyWithResponse is a helper method to define mock.On call
+//   - ctx context.Context
+//   - namespaceName string
+//   - approvalPolicyName string
+//   - body gen.ApprovalPolicy
+//   - reqEditors ...gen.RequestEditorFn
+func (_e *MockClientWithResponsesInterface_Expecter) UpdateApprovalPolicyWithResponse(ctx interface{}, namespaceName interface{}, approvalPolicyName interface{}, body interface{}, reqEditors ...interface{}) *MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call {
+	return &MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call{Call: _e.mock.On("UpdateApprovalPolicyWithResponse",
+		append([]interface{}{ctx, namespaceName, approvalPolicyName, body}, reqEditors...)...)}
+}
+
+func (_c *MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call) Run(run func(ctx context.Context, namespaceName string, approvalPolicyName string, body gen.ApprovalPolicy, reqEditors ...gen.RequestEditorFn)) *MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]gen.RequestEditorFn, len(args)-4)
+		for i, a := range args[4:] {
+			if a != nil {
+				variadicArgs[i] = a.(gen.RequestEditorFn)
+			}
+		}
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(gen.ApprovalPolicy), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call) Return(_a0 *gen.UpdateApprovalPolicyResp, _a1 error) *MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call) RunAndReturn(run func(context.Context, string, string, gen.ApprovalPolicy, ...gen.RequestEditorFn) (*gen.UpdateApprovalPolicyResp, error)) *MockClientWithResponsesInterface_UpdateApprovalPolicyWithResponse_Call {
 	_c.Call.Return(run)
 	return _c
 }
