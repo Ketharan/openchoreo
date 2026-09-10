@@ -175,16 +175,20 @@ when, and optionally why, mirroring `spec.decision`. A request that simply arriv
 approval and leave nothing on the object; the phase alone is not an audit trail, and the object
 outlives the API-layer audit event in the common case where an operator is reading the CR.
 
-### Two classes of gated action
+### Three classes of gated action
 
-This is the part that has to be right for the model to generalise. OpenChoreo actions fall into two
-classes and they cannot share one enforcement point:
+This is the part that has to be right for the model to generalise. OpenChoreo actions fall into
+three classes and they cannot share one enforcement point:
 
 - **Synchronous actions** — invoked once through the API and done (`component:exec`, secret access,
   a subscription). The chokepoint is the API handler.
 - **Reconciled actions** — expressed as desired state and continuously actuated by a controller
   (promotion, and most of the CRD surface). For these, the gate must withhold *actuation*, not
   reject the *write*.
+- **In-flight actions** — an execution that is already running and pauses partway for a decision,
+  then resumes. A `WorkflowRun` reaching an approval step is the case; see *In-flight approvals*
+  below. The gate here does not refuse anything, because nothing has been requested yet at the
+  moment it matters — the execution parks itself and the platform decides when it may continue.
 
 Rejecting a gated write in a validating admission webhook is the obvious move and is wrong here, on
 three independent grounds:
@@ -209,6 +213,67 @@ cover `kubectl` or a GitOps controller writing the CR directly. See *Deferred*.
 Note that the gate cannot live inside `AuthzChecker.Check`, despite that being the single shared
 authorization path: `CheckRequest` deliberately carries no payload, and the gate needs the desired
 state to fingerprint. It goes in the per-service wrapper, which already holds both specs.
+
+### In-flight approvals
+
+The first two classes both answer "may this happen?" before anything happens. The third does not,
+and it is the class most customers describe when they ask for approvals on something other than
+promotion: a platform engineer publishes a developer-facing operation — provisioning a Git
+repository, granting temporary access, applying an infrastructure change — and wants a decision
+partway through it rather than at the door.
+
+OpenChoreo already has the primitive for those operations. A `Workflow` / `ClusterWorkflow` is a
+platform-engineer-authored template: an OpenAPI v3 `parameters` schema plus an arbitrary Kubernetes
+`runTemplate` rendered onto a workflow plane, with `resources` and `externalRefs`. It is not
+build-specific — `samples/workflows/github-stats-report/` is an ordinary non-CI example. A developer
+supplies parameters as a `WorkflowRun`; the run's `workflow.name`, `workflow.kind` and parameters are
+immutable once created.
+
+Gating `workflowrun:create` — the action exists, and `resource.workflow` is already a registered
+condition attribute for it — covers the "approve before this starts" case, and covers it well: one
+approvable action plus one condition dimension gates *any* operation a platform engineer models as a
+Workflow, with no further registry work per operation. But it does not cover the case above, because
+the decision usually needs to come after the workflow has computed something. Approving a plan, a
+diff, a cost estimate or the exact resource about to be created is the point; approving the
+parameters that were typed in is much weaker.
+
+Supporting that requires five things this proposal does not currently provide:
+
+1. **A run phase that can express waiting.** `WorkflowRunStatus.Phase` is
+   `Pending|Running|Succeeded|Failed|Skipped|Error`. Argo has no distinct suspended *workflow* phase —
+   a run parked on a suspend node stays `Running` with a suspended node beneath it, and the controller
+   maps Argo's workflow phase through. So a run waiting on a human is indistinguishable from one doing
+   work, in `occ`, in the portal, and to anything watching runs. This is a `WorkflowRun` change,
+   independent of approvals, and it should land first.
+2. **Request creation from the control plane.** Today the gate runs inside an API service on a
+   caller's request. Here the trigger is a controller observing that a run has suspended, with the
+   requester carried from whoever created the run.
+3. **`requestedState` supplied rather than derived.** The gate currently computes it from the old and
+   new specs it holds. For this class the execution must be able to hand the platform the thing it
+   wants reviewed. This generalises the model rather than complicating it: `requestedState` is already
+   an opaque `RawExtension` and `stateFingerprint` already a digest over it, so what changes is who
+   provides the bytes, not the shape.
+4. **`OnApproval: Resume`.** Neither `Retry` nor `Execute` fits — approval un-suspends a specific node
+   in a specific run.
+5. **Step identity on the request.** A workflow may pause more than once, so one run maps to several
+   requests. `AllowParallelRequests` keyed on a target does not express that.
+
+Two consequences are worth stating plainly rather than discovering later. A pending request in this
+class **blocks a live execution** — a suspended run holds its place with its own
+`ttlAfterCompletion` running, so an undecided request is not a user waiting to retry but an execution
+stalled, and the `ApprovalRequest` lifecycle has to answer what happens when the run is deleted or
+expires beneath it. And the **bypass is a different one**: resuming the Argo workflow directly on the
+workflow plane skips OpenChoreo entirely, which is a different population and a different blast
+radius from the `kubectl` bypass that affects the reconciled class.
+
+There is a legitimate question of whether this belongs to OpenChoreo at all, since Argo already has
+suspend and `argo resume`. The case for OpenChoreo owning it is that approver identity, the policy
+that decides an approval is needed, and the audit record belong to the platform rather than to the
+execution engine, and that a platform engineer should not have to expose the workflow plane to
+approvers in order to get a decision. That case should be argued rather than assumed.
+
+**Not in this increment.** Recorded here because the model must not foreclose it, and because the
+`requestedState`-supplied generalisation is cheaper to allow for now than to retrofit.
 
 ### Binding an approval to one specific change
 
@@ -277,7 +342,7 @@ type ActionApproval struct {
 ```
 
 `releasebinding:update` registers as `{OnApproval: Retry, AllowParallelRequests: false}` — retry
-because promotion is a reconciled action, as *Two classes of gated action* sets out. A synchronous
+because promotion is a reconciled action, as *Three classes of gated action* sets out. A synchronous
 action such as an API subscription would register `Execute`. Putting this on the action is what makes
 the goal "adding a second gated action requires registration plus one enforcement call" true; putting
 it on the policy would make every new action a CRD change and let a tenant configure an incoherent
@@ -370,6 +435,9 @@ Deliberately not in this proposal, and required before the feature is complete:
 - **Portal**, in `openchoreo/backstage-plugins`.
 - **Role-based approver resolution** through the PDP. Until then a `roleRef` approver matches nobody,
   so policies must use `entitlement` approvers — or `roleRef` should be rejected at validation.
+- **The in-flight class**, and with it `workflowrun:create` as a second registered approvable action.
+  See *In-flight approvals*. The prerequisite is a `WorkflowRun` phase that can express waiting on a
+  decision, which is a change to that CRD rather than to these.
 
 ---
 
